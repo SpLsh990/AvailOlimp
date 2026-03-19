@@ -1,8 +1,14 @@
 from flask import Flask, render_template, Blueprint, request
+from control_data_base import Main_db
 
 main_bp = Blueprint('main_bp', __name__,
                     template_folder='../templates/main',
                     static_folder='../static')
+
+app = Flask(__name__)
+users_bd = Main_db()
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydatabase.db'
+app.config['SECRET_KEY'] = 'supersecretkey'
 
 @main_bp.route('/')
 def index():
@@ -17,7 +23,8 @@ def register():
     elif request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        print(email, password)
-        return """
-        <h1>Status: OK</h1>
-        """
+        nickname = request.form['nickname']
+        print(email, password, nickname)
+        answer = users_bd.register_user(email, password, nickname)
+        print(answer)
+        return answer

@@ -1,5 +1,6 @@
 import flask
 from blueprints.main import main_bp
+from control_data_base import Main_db
 
 
 def create_app():
