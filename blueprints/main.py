@@ -44,6 +44,26 @@ def login():
             session['nickname'] = answer[1].nickname
             return redirect('/')
 
+@main_bp.route('/pvp_mode.html')
+def pvp_mode():
+    if session.get('user_id') is None:
+        return redirect('/login.html')
+    else:
+        return render_template('pvp_mode.html')
+
+@main_bp.route('/physics_mode.html')
+def physics_mode():
+    if session.get('user_id') is None:
+        return redirect('/login.html')
+    else:
+        return render_template('physic_mode.html')
+
+@main_bp.route('/math_mode.html')
+def math_mode():
+    if session.get('user_id') is None:
+        return redirect('/login.html')
+    else:
+        return render_template('math_mode.html')
 
 @main_bp.route('/logout.html')
 def logout():

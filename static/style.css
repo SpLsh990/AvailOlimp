@@ -598,3 +598,112 @@ h1 {
         padding: 14px;
     }
 }
+/* Стили для выпадающего меню */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    text-decoration: none;
+    color: #e2e8f0;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.dropdown-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 60%;
+    height: 2px;
+    background: #3b82f6;
+    transition: transform 0.3s ease;
+    border-radius: 2px;
+}
+
+.dropdown-btn:hover::after {
+    transform: translateX(-50%) scaleX(1);
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(26, 31, 46, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    min-width: 180px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.dropdown:hover .dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-content a {
+    color: #e2e8f0;
+    padding: 12px 20px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border-radius: 0;
+}
+
+.dropdown-content a:first-child {
+    border-radius: 12px 12px 0 0;
+}
+
+.dropdown-content a:last-child {
+    border-radius: 0 0 12px 12px;
+}
+
+.dropdown-content a:hover {
+    background: rgba(59, 130, 246, 0.2);
+    color: #ffffff;
+    padding-left: 25px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .dropdown-content {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        display: none;
+        background: rgba(26, 31, 46, 0.98);
+        margin-top: 5px;
+    }
+
+    .dropdown.active .dropdown-content {
+        display: block;
+    }
+
+    .dropdown-btn {
+        width: 100%;
+        text-align: left;
+    }
+}

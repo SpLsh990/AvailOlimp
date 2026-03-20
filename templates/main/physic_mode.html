@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Задачи по физике</title>
+    <link rel="stylesheet" href="../../static/style.css">
+</head>
+<body>
+<div class="decor-element decor-1"></div>
+    <div class="decor-element decor-2"></div>
+
+    <header>
+    <div class="conteiner_for_header">
+        <div class="header-left">
+            <a href="{{url_for('main_bp.index')}}">Главная</a>
+            <div class="dropdown">
+                <a href="#" class="dropdown-btn">Задачи ▼</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
+                    <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
+                </div>
+            </div>
+            <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
+        </div>
+        <div class="header-right">
+            {% if session.user_id %}
+            <a href="{{ url_for('main_bp.logout') }}" class="register-btn"> Выход </a>
+            {% else %}
+            <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
+            <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+</body>
+</html>
