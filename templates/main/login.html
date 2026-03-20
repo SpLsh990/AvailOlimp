@@ -16,11 +16,13 @@
                 <a href="{{url_for('main_bp.index')}}">Главная</a>
                 <a href="#">Задачи</a>
                 <a href="#">Соревновательный режим</a>
+            </div>
+        </div>
     </header>
 
     <main class="register-container">
         <div class="register-card">
-            <h2>Создать аккаунт</h2>
+            <h2>Войти в аккаунт</h2>
             <p class="register-subtitle">Присоединяйся к сообществу олимпиадников</p>
 
             <form method="post" class="register-form">
@@ -38,15 +40,8 @@
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label for="nickname">Никнейм</label>
-                    <div class="input-email">
-                        <input type="text" id="nickname" name="nickname" placeholder="LutiyPetya" required>
-                    </div>
-                </div>
-
                 <button type="submit" class="submit-btn">
-                    Регистрация
+                    Войти
                 </button>
             </form>
 
@@ -65,7 +60,7 @@
             </button>
 
             <p class="login-link">
-                Уже есть аккаунт? <a href="{{ url_for('main_bp.login') }}">Войти</a>
+                Нет аккаунта?<a href="{{ url_for('main_bp.register') }}">Зарегистрируйся!</a>
             </p>
         </div>
     </main>

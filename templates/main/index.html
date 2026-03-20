@@ -17,12 +17,23 @@
                 <a href="#">Задачи</a>
                 <a href="#">Соревновательный режим</a>
             </div>
-            <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
+            <div class="header-right">
+                {% if session.user_id %}
+                <a href="{{ url_for('main_bp.logout') }}" class="register-btn"> Выход </a>
+                {% else %}
+                <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
+                <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 
     <div class="conteiner_for_main_text">
+        {% if session.user_id %}
+        <h1>Привет, {{ session.nickname }}!</h1>
+        {% else %}
         <h1>Привет!</h1>
+        {% endif %}
         <p>Это площадка которая позволит тебе прокачивать свои навыки в решении олимпиадных задач по профильным предметам</p>
 
         <div class="subjects-block">
