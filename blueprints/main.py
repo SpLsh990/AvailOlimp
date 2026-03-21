@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Blueprint, request, session, redirect
+from flask import render_template, Blueprint, request, session, redirect
 from control_data_base import User
 
 main_bp = Blueprint('main_bp', __name__,
@@ -24,6 +24,7 @@ def register():
         answer = User.register_user(email, password, nickname)
         if answer[0] == "success":
             session['user_id'] = answer[1]
+            session['email'] = email
             session['nickname'] = nickname
             return redirect('/')
         else:
@@ -44,12 +45,14 @@ def login():
             session['nickname'] = answer[1].nickname
             return redirect('/')
 
+
 @main_bp.route('/pvp_mode.html')
 def pvp_mode():
     if session.get('user_id') is None:
         return redirect('/login.html')
     else:
         return render_template('pvp_mode.html')
+
 
 @main_bp.route('/physics_mode.html')
 def physics_mode():
@@ -58,12 +61,14 @@ def physics_mode():
     else:
         return render_template('physic_mode.html')
 
+
 @main_bp.route('/math_mode.html')
 def math_mode():
     if session.get('user_id') is None:
         return redirect('/login.html')
     else:
         return render_template('math_mode.html')
+
 
 @main_bp.route('/logout.html')
 def logout():
