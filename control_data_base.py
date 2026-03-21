@@ -6,7 +6,7 @@ add_new_user
 
 from flask_sqlalchemy import SQLAlchemy
 from valid_or_not import email_is_valid
-from bcrypt import hashpw, gensalt, checkpw
+from bcrypt import gensalt, hashpw, checkpw
 
 db = SQLAlchemy()
 
