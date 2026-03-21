@@ -598,7 +598,7 @@ h1 {
         padding: 14px;
     }
 }
-/* Стили для выпадающего меню */
+
 .dropdown {
     position: relative;
     display: inline-block;
@@ -686,7 +686,6 @@ h1 {
     padding-left: 25px;
 }
 
-/* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
     .dropdown-content {
         position: static;
@@ -705,5 +704,192 @@ h1 {
     .dropdown-btn {
         width: 100%;
         text-align: left;
+    }
+}
+
+.header-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.profile-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 16px 6px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-avatar:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: white;
+    text-transform: uppercase;
+}
+
+.profile-name {
+    font-weight: 500;
+    color: #e2e8f0;
+    font-size: 0.95rem;
+}
+
+.chevron-icon {
+    color: #94a3b8;
+    transition: transform 0.3s ease;
+}
+
+.profile-dropdown-menu.active .chevron-icon {
+    transform: rotate(180deg);
+}
+
+.profile-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 280px;
+    background: rgba(26, 31, 46, 0.98);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.profile-dropdown-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.profile-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-avatar-circle {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: white;
+    text-transform: uppercase;
+}
+
+.dropdown-user-info {
+    flex: 1;
+}
+
+.dropdown-username {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.dropdown-email {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #e2e8f0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.dropdown-item svg {
+    flex-shrink: 0;
+}
+
+.dropdown-item:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #ffffff;
+    padding-left: 24px;
+}
+
+.logout-item {
+    color: #ef4444;
+}
+
+.logout-item:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+@media (max-width: 768px) {
+    .profile-name {
+        display: none;
+    }
+
+    .profile-avatar {
+        padding: 6px 10px;
+    }
+
+    .profile-dropdown-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        transform: translateY(100%);
+    }
+
+    .profile-dropdown-menu.active {
+        transform: translateY(0);
+    }
+
+    .profile-dropdown-header {
+        padding: 20px;
+    }
+
+    .dropdown-item {
+        padding: 14px 20px;
     }
 }

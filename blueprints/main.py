@@ -41,6 +41,7 @@ def login():
         answer = User.login_user(email, password)
         if answer[0] == "success":
             session['user_id'] = answer[1].id
+            session['email'] = email
             session['nickname'] = answer[1].nickname
             return redirect('/')
 
