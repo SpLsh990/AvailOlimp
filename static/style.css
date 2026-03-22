@@ -598,7 +598,8 @@ h1 {
         padding: 14px;
     }
 }
-/* Стили для выпадающего меню */
+
+
 .dropdown {
     position: relative;
     display: inline-block;
@@ -686,7 +687,7 @@ h1 {
     padding-left: 25px;
 }
 
-/* Адаптивность для мобильных устройств */
+
 @media (max-width: 768px) {
     .dropdown-content {
         position: static;
@@ -706,4 +707,380 @@ h1 {
         width: 100%;
         text-align: left;
     }
+}
+
+/* ====================ФИЗИКА===================== */
+.physics-container {
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    min-height: calc(100vh - 160px);
+}
+
+
+.physics-header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+.physics-header h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #3b82f6, #60a5fa, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.physics-header p {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+.topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+
+.topic-card {
+    background: rgba(26, 31, 46, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 440px;
+}
+
+
+.topic-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+.topic-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.topic-card:hover::before {
+    opacity: 1;
+}
+
+
+.topic-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+}
+
+.topic-icon svg {
+    width: 32px;
+    height: 32px;
+    stroke: white;
+    stroke-width: 1.5;
+}
+
+
+.topic-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #ffffff;
+    position: relative;
+    z-index: 1;
+}
+
+
+.topic-description {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    flex-grow: 1;
+}
+
+
+.topic-stats {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.stat svg {
+    width: 16px;
+    height: 16px;
+    stroke: #64748b;
+}
+
+
+.topic-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 12px;
+    color: #60a5fa;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
+    margin-top: auto;
+    width: fit-content;
+}
+
+.topic-btn:hover {
+    background: rgba(59, 130, 246, 0.4);
+    border-color: #3b82f6;
+    color: white;
+    gap: 12px;
+}
+
+.topic-btn svg {
+    transition: transform 0.3s ease;
+}
+
+.topic-btn:hover svg {
+    transform: translateX(3px);
+}
+
+
+.difficulty-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 1;
+}
+
+.difficulty-easy {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #4ade80;
+}
+
+.difficulty-medium {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+}
+
+.difficulty-hard {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+.coming-soon {
+    background: rgba(100, 116, 139, 0.2);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    color: #94a3b8;
+}
+
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 50px 0 30px;
+    text-align: center;
+    background: linear-gradient(135deg, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+
+@media (max-width: 1024px) {
+    .physics-header h1 {
+        font-size: 3rem;
+    }
+
+    .topics-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+    }
+
+    .topic-card {
+        min-height: 420px;
+    }
+}
+
+@media (max-width: 768px) {
+    .physics-container {
+        padding: 15px;
+        margin: 20px auto;
+    }
+
+    .physics-header {
+        margin-bottom: 40px;
+    }
+
+    .physics-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .physics-header p {
+        font-size: 1rem;
+        padding: 0 20px;
+    }
+
+    .topics-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .topic-card {
+        padding: 25px;
+        min-height: 400px;
+    }
+
+    .topic-card h3 {
+        font-size: 1.3rem;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+        margin: 40px 0 25px;
+    }
+
+    .topic-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .topic-icon svg {
+        width: 26px;
+        height: 26px;
+    }
+}
+
+@media (max-width: 480px) {
+    .physics-header h1 {
+        font-size: 2rem;
+    }
+
+    .topic-card {
+        padding: 20px;
+        min-height: 380px;
+    }
+
+    .topic-stats {
+        gap: 10px;
+    }
+
+    .stat {
+        font-size: 0.75rem;
+    }
+
+    .difficulty-badge {
+        top: 15px;
+        right: 15px;
+        padding: 4px 10px;
+        font-size: 0.7rem;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        margin: 30px 0 20px;
+    }
+
+    .topic-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
+.topic-card:nth-child(1) { animation-delay: 0.1s; }
+.topic-card:nth-child(2) { animation-delay: 0.2s; }
+.topic-card:nth-child(3) { animation-delay: 0.3s; }
+.topic-card:nth-child(4) { animation-delay: 0.4s; }
+.topic-card:nth-child(5) { animation-delay: 0.5s; }
+.topic-card:nth-child(6) { animation-delay: 0.6s; }
+
+
+.topic-card:hover .topic-icon {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.topic-card .topic-icon {
+    transition: transform 0.3s ease;
+}
+
+
+.physics-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.physics-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.physics-container::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
+}
+
+.physics-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.8);
 }

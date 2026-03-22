@@ -1,36 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Задачи по физике</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Физика | Задачи для олимпиадников</title>
     <link rel="stylesheet" href="../../static/style.css">
 </head>
 <body>
-<div class="decor-element decor-1"></div>
+    <div class="decor-element decor-1"></div>
     <div class="decor-element decor-2"></div>
 
     <header>
-    <div class="conteiner_for_header">
-        <div class="header-left">
-            <a href="{{url_for('main_bp.index')}}">Главная</a>
-            <div class="dropdown">
-                <a href="#" class="dropdown-btn">Задачи ▼</a>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
-                    <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
+        <div class="conteiner_for_header">
+            <div class="header-left">
+                <a href="{{url_for('main_bp.index')}}">Главная</a>
+                <div class="dropdown">
+                    <a href="#" class="dropdown-btn">Задачи ▼</a>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
+                        <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
+                    </div>
                 </div>
+                <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
             </div>
-            <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
+            <div class="header-right">
+                {% if session.user_id %}
+                <a href="{{ url_for('main_bp.logout') }}" class="register-btn"> Выход </a>
+                {% else %}
+                <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
+                <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
+                {% endif %}
+            </div>
         </div>
-        <div class="header-right">
-            {% if session.user_id %}
-            <a href="{{ url_for('main_bp.logout') }}" class="register-btn"> Выход </a>
-            {% else %}
-            <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
-            <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
-            {% endif %}
+    </header>
+
+    <main class="physics-container">
+        <div class="physics-header">
+            <h1>Раздел физики</h1>
+            <p>Погрузись в мир законов природы, реши задачи и стань мастером физики!</p>
         </div>
-    </div>
-</header>
+
+        <!-- Основные темы -->
+        <div class="topics-grid">
+            <!-- Механика -->
+            <div class="topic-card">
+                <div class="difficulty-badge difficulty-medium">Средний уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12"/>
+                        <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                </div>
+                <h3>Механика</h3>
+                <p class="topic-description">
+                    Кинематика, динамика, законы Ньютона, импульс, энергия, вращательное движение.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>24 задачи</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Термодинамика -->
+            <div class="topic-card">
+                <div class="difficulty-badge difficulty-medium">Средний уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2 L12 6 M12 18 L12 22 M4 12 L8 12 M16 12 L20 12"/>
+                        <path d="M12 8 L12 12 L15 15" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="4" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3>Термодинамика</h3>
+                <p class="topic-description">
+                    Температура, теплота, газовые законы, энтропия, тепловые машины.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>18 задач</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Электродинамика -->
+            <div class="topic-card featured-topic">
+                <div class="difficulty-badge difficulty-hard">Сложный уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 8 L20 8 M4 16 L20 16 M8 4 L8 20 M16 4 L16 20"/>
+                        <circle cx="12" cy="12" r="2"/>
+                    </svg>
+                </div>
+                <h3>Электродинамика</h3>
+                <p class="topic-description">
+                    Электрические цепи, магнитное поле, электромагнитная индукция, уравнения Максвелла.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>32 задачи</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Колебания и волны -->
+            <div class="topic-card">
+                <div class="difficulty-badge difficulty-medium">Средний уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 12 L6 8 L10 16 L14 6 L18 14 L22 12" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <h3>Колебания и волны</h3>
+                <p class="topic-description">
+                    Механические и электромагнитные колебания, резонанс, волновые процессы.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>15 задач</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Оптика -->
+            <div class="topic-card">
+                <div class="difficulty-badge difficulty-medium">Средний уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12"/>
+                        <path d="M12 8 L12 12 L8 12" stroke-width="2"/>
+                        <circle cx="12" cy="12" r="4" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3>Оптика</h3>
+                <p class="topic-description">
+                    Геометрическая оптика, интерференция, дифракция, поляризация света.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>20 задач</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Квантовая физика -->
+            <div class="topic-card">
+                <div class="difficulty-badge difficulty-hard">Сложный уровень</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="2"/>
+                        <path d="M12 2 L12 6 M12 18 L12 22 M2 12 L6 12 M18 12 L22 12"/>
+                        <path d="M4.93 4.93 L7.76 7.76 M16.24 16.24 L19.07 19.07 M4.93 19.07 L7.76 16.24 M16.24 7.76 L19.07 4.93"/>
+                    </svg>
+                </div>
+                <h3>Квантовая физика</h3>
+                <p class="topic-description">
+                    Фотоэффект, корпускулярно-волновой дуализм, атомная физика.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>12 задач</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn">
+                    Начать решать
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Ядерная физика -->
+            <div class="topic-card">
+                <div class="difficulty-badge coming-soon">Скоро</div>
+                <div class="topic-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2 L12 4 M12 20 L12 22 M2 12 L4 12 M20 12 L22 12"/>
+                        <circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/>
+                    </svg>
+                </div>
+                <h3>Ядерная физика</h3>
+                <p class="topic-description">
+                    Радиоактивность, ядерные реакции, энергия связи, физика элементарных частиц.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 6v6l4 2" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                        </svg>
+                        <span>В разработке</span>
+                    </div>
+                </div>
+                <a href="#" class="topic-btn" style="opacity: 0.5; cursor: not-allowed;">
+                    Скоро будет
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- Рекомендуемые сборники -->
+        <h2 class="section-title">🎯 Рекомендуемые сборники</h2>
+        <div class="topics-grid" style="margin-bottom: 0;">
+            <div class="topic-card">
+                <div class="topic-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16v16H4z M8 8h8v8H8z M8 12h8"/>
+                    </svg>
+                </div>
+                <h3>Олимпиадные задачи</h3>
+                <p class="topic-description">
+                    Сборник задач повышенной сложности для подготовки к региональным и всероссийским олимпиадам.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">🔥 50+ задач</div>
+                    <div class="stat">🏆 Всероссийский уровень</div>
+                </div>
+                <a href="#" class="topic-btn">Подробнее →</a>
+            </div>
+            <div class="topic-card">
+                <div class="topic-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <h3>Экзаменационные задачи</h3>
+                <p class="topic-description">
+                    Типовые задачи из ЕГЭ, вступительных экзаменов и олимпиад 1-го уровня.
+                </p>
+                <div class="topic-stats">
+                    <div class="stat">📝 100+ задач</div>
+                    <div class="stat">✅ С ответами</div>
+                </div>
+                <a href="#" class="topic-btn">Подробнее →</a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Адаптивность для выпадающего меню на мобильных устройствах
+        if (window.innerWidth <= 768) {
+            const dropdownBtn = document.querySelector('.dropdown-btn');
+            if (dropdownBtn) {
+                dropdownBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const dropdown = this.closest('.dropdown');
+                    dropdown.classList.toggle('active');
+                });
+            }
+        }
+    </script>
 </body>
 </html>
