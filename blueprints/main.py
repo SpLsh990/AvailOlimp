@@ -26,8 +26,6 @@ def register():
             session['user_id'] = answer[1]
             session['nickname'] = nickname
             return redirect('/')
-        else:
-            print(answer)
         return answer
 
 
@@ -44,6 +42,15 @@ def login():
             session['email'] = email
             session['nickname'] = answer[1].nickname
             return redirect('/')
+        else:
+            session['password_error'] = False
+            session['session.error_user_exist'] = False
+            if answer[1] == "Wrong password":
+                session['password_error'] = True
+                return redirect('/login.html')
+            elif answer[1] == "Current user does not exist":
+                session['error_user_exist'] = True
+                return redirect('/login.html')
 
 @main_bp.route('/pvp_mode.html')
 def pvp_mode():
