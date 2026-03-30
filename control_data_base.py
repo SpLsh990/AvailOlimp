@@ -5,8 +5,11 @@ add_new_user
 """
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import foreign
+
 from valid_or_not import email_is_valid
 from bcrypt import gensalt, hashpw, checkpw
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -17,6 +20,10 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     nickname = db.Column(db.String(100), nullable=False, unique=True)
+    elo = db.Column(db.Integer, default=1000)
+    register_day = db.Column(db.DateTime, default=lambda: datetime.now().replace(second=0, microsecond=0))
+    last_entry = db.Column(db.DateTime, nullable=False,
+                           default=lambda: datetime.now().replace(second=0, microsecond=0))
 
     @staticmethod
     def register_user(email, password, nickname):
@@ -44,8 +51,46 @@ class User(db.Model):
         exist_user = User.query.filter_by(email=result).first()
         if exist_user:
             if checkpw(password.encode(), exist_user.password):
+                exist_user.last_entry = datetime.now().replace(second=0, microsecond=0)
+                db.session.commit()
                 return ("success", exist_user)
             else:
                 return ("error", "Wrong answer")
         else:
             return ("error", "Current user does not exist")
+
+
+class Problem(db.Model):
+    __tablename__ = "problems"
+    id = db.Column(db.Integer, primary_key=True)
+    topic = db.Column(db.String(50), nullable=False)
+    condition = db.Column(db.String(500), nullable=False, unique=True)
+    right_answer = db.Column(db.String(50), nullable=False)
+    attachment = db.Column(db.String(100))
+
+    @staticmethod
+    def add_problem(topic, condition, right_answer):
+        if not Problem.query.filter_by(condition=condition).first():
+            new_problem = Problem(topic=topic, condition=condition, right_answer=right_answer)
+            db.session.add(new_problem)
+            db.session.commit()
+            return ("success", "The problem has been added successfully")
+        return ("error", "An error occurred or this problem already exists")
+
+
+class SolvedProblem(db.Model):
+    __tablename__ = "solvedproblems"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    problem_id = db.Column(db.Integer, db.ForeignKey("problems.id"))
+
+    # Добавление и проверка решенной задачи в "копилку"
+    @staticmethod
+    def add_solved_problem(user_id, user_answer, problem_id):
+        right_answer = Problem.query.filter_by(id=problem_id).first()
+        if user_answer == right_answer:
+            solved_problem = SolvedProblem(user_id=user_id, problem_id=problem_id)
+            db.session.add(solved_problem)
+            db.session.commit()
+            return ("succes", "The problem has been solved")
+        return ("error", "Worng answer or error occured")

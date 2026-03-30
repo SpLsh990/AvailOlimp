@@ -17,14 +17,11 @@ def create_app():
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 
-    # Инициализируем БД с приложением
     db.init_app(app)
 
-    # Создаем таблицы
     with app.app_context():
         db.create_all()
 
-    # Регистрируем blueprint
     app.register_blueprint(main_bp)
 
     return app
