@@ -13,6 +13,12 @@
     <header>
         <div class="conteiner_for_header">
             <div class="header-left">
+                <a href="{{url_for('main_bp.index')}}" class="logo">
+                <img src="{{ url_for('main_bp.static', filename='images/logo.png') }}"
+                     alt="AvailOlimp Logo"
+                     class="logo-img">
+                <span class="logo-text">AvailOlimp</span>
+            </a>
                 <a href="{{url_for('main_bp.index')}}">Главная</a>
                 <a href="#">Задачи</a>
                 <a href="#">Соревновательный режим</a>
