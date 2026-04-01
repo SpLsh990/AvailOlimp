@@ -29,36 +29,32 @@
     <div class="register-card">
         <h2>Войти в аккаунт</h2>
         <p class="register-subtitle">Присоединяйся к сообществу олимпиадников</p>
+        <div>
+            {% if session.error_password_email %}
+            <div class="error-message">
+                <span>Не верная почта или пароль</span>
+            </div>
+            {% else %}
+            <p></p>
+            {% endif %}
+        </div>
 
         <form method="post" class="register-form">
             <div class="input-group">
                 <label for="email">Электронная почта</label>
                 <div class="input-email">
                     <input type="email" id="email" name="email" placeholder="your@email.ru" required>
-                </div>
-                {% if session.error_user_exist %}
-                <div class="error-message">
-                    <span>Данного пользователя не существует</span>
-                </div>
-                {% endif %}
-            </div>
 
-            <div class="input-group">
-                <label for="password">Пароль</label>
-                <div class="input-password">
-                    <input type="password" id="password" name="password" placeholder="··········" required>
-                </div>
-                {% if session.password_error %}
-                <div class="error-message">
-                    <span>Не верный пароль</span>
-                </div>
-                {% endif %}
-            </div>
+                    <div class="input-group">
+                        <label for="password">Пароль</label>
+                        <div class="input-password">
+                            <input type="password" id="password" name="password" placeholder="··········" required>
+                        </div>
 
-            <button type="submit" class="submit-btn">
-                Войти
-            </button>
-        </form>
+                        <button type="submit" class="submit-btn">
+                            Войти
+                        </button>
+                </form>
 
         <div class="divider">
             <span>или</span>

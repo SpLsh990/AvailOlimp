@@ -6,6 +6,7 @@ from control_data_base import db
 def create_app():
     app = flask.Flask(__name__)
 
+    # Добавляем конфигурацию
     app.secret_key = "secret key"
     app.config.update(
         SESSION_TYPE='filesystem',
