@@ -131,7 +131,11 @@
                 <div class="col-title"><a href="{{url_for('main_bp.physic_1')}}" class="task-link">Количество троек</a></div>
                 <div class="col-subject"><span class="subject-tag physics">Математика</span></div>
                 <div class="col-difficulty"><span class="difficulty-tag easy">Легкая</span></div>
+                {% if "1" in session.completed_task %}
+                <div class="col-status"><span class="status-tag not-started">Решена!</span></div>
+                {% else %}
                 <div class="col-status"><span class="status-tag not-started">Не решена</span></div>
+                {% endif %}
             </div>
 
         </div>
@@ -149,7 +153,7 @@
         <button class="pagination-btn">Следующая →</button>
     </div>
 </main>
-
+<script src="../../static/script.js"></script>
 <script>
     const subjectFilter = document.getElementById('subjectFilter');
     const difficultyFilter = document.getElementById('difficultyFilter');
@@ -200,6 +204,5 @@
         row.style.display = 'grid';
     });
 </script>
-<script src="../../static/script.js"></script>
 </body>
 </html>

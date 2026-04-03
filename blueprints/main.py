@@ -46,6 +46,7 @@ def login():
             session['user_id'] = answer[1].id
             session['email'] = email
             session['nickname'] = answer[1].nickname
+            session['completed_task'] = SolvedProblem.get_solved_problems(session['user_id'])
             return redirect('/')
         else:
             session['error_password_email'] = True
@@ -65,6 +66,8 @@ def physics_mode():
     if session.get('user_id') is None:
         return redirect('/login.html')
     else:
+        session['completed_task'] = SolvedProblem.get_solved_problems(session['user_id'])
+        print(session['completed_task'])
         return render_template('physic_mode.html')
 
 
@@ -85,7 +88,11 @@ def logout():
 @main_bp.route("/physic_1.html", methods=['GET', 'POST'])
 def physic_1():
     if request.method == 'GET':
-        problem = Problem.get_problem(1)
+        problem = Problem.add_problem("math",
+                                      " Сколькими способами из натуральных чисел от 1 до 100 можно выбрать три числа так, чтобы одно из них равнялось среднему арифметическому двух оставшихся?",
+                                      2450,
+                                      "")
+        problem = Problem.get_problem(id=1)
         return render_template("physic_1.html",
                                subject=problem.object,
                                task_text=problem.condition,
@@ -93,11 +100,19 @@ def physic_1():
 
     elif request.method == 'POST':
         answer = request.form['answer']
-        print(answer)
         server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, 1)
         if server_answer[0] == "success":
-            session['correct_1'] = True
+            session['completed_task'].append("1")
+            print(session['completed_task'])
+            session.modified = True
         else:
-            session['incorrect_1'] = True
+            session["incorrect_answer_1"] = True
     return redirect('/physic_1.html')
 
+"""
+Заготовка для добавления 1 задачи
+problem = Problem.add_problem("math",
+                                      " Сколькими способами из натуральных чисел от 1 до 100 можно выбрать три числа так, чтобы одно из них равнялось среднему арифметическому двух оставшихся?",
+                                      2450,
+                                      "")
+"""
