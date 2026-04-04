@@ -53,24 +53,36 @@ class User(db.Model):
             return ("error", "Current user does not exist")
 
 
+# Problem: class для добавления задач
 class Problem(db.Model):
     __tablename__ = "problems"
+    """
+    id - id
+    object - объект (математика / физика) | обязательно
+    condition - условие задачи | обязательно
+    right_answer - правильный ответ | обязательно
+    attachment - название фото в папке static/images/ | не обязательно, по умолчанию: ""
+    """
     id = db.Column(db.Integer, primary_key=True)
     object = db.Column(db.String(50), nullable=False)
     condition = db.Column(db.String(500), nullable=False, unique=True)
     right_answer = db.Column(db.String(50), nullable=False)
     attachment = db.Column(db.String(100))
 
+    # add_problem - метод для добавления проблемы
     @staticmethod
-    def add_problem(object, condition, right_answer, attachment):
+    def add_problem(object: str, condition: str, right_answer:str, attachment="") -> tuple:
+        # если проблемы еще нет, то добавляем
         if not Problem.query.filter_by(condition=condition).first():
             new_problem = Problem(object=object, condition=condition, right_answer=right_answer, attachment=attachment)
             db.session.add(new_problem)
             db.session.commit()
             return ("success", "The problem has been added successfully")
         return ("error", "An error occurred or this problem already exists")
+
+    # метод для получения класса с нужной задачей по ее id
     @staticmethod
-    def get_problem(id):
+    def get_problem(id: int):
         problem = Problem.query.filter_by(id=id).first()
         return problem
 
@@ -112,6 +124,7 @@ class SolvedProblem(db.Model):
             # если задачи нет в решенных, добавляем
             if problem_id not in solved_problem_data:
                 solved_problem.problem_id = solved_problem.problem_id + "," + str(problem_id)
+                db.session.commit()
                 return ("success", "The problem has been solved in list")
             # если есть, ошибка: The problem is already solved
             else:

@@ -93,13 +93,6 @@
         <h1 class="tasks-title">Банк заданий</h1>
         <div class="tasks-filters">
             <div class="filter-group">
-                <select class="filter-select" id="subjectFilter">
-                    <option value="all">Все предметы</option>
-                    <option value="physics">Физика</option>
-                    <option value="math">Математика</option>
-                </select>
-            </div>
-            <div class="filter-group">
                 <select class="filter-select" id="difficultyFilter">
                     <option value="all">Все сложности</option>
                     <option value="easy">Легкие</option>
@@ -128,10 +121,10 @@
         <div class="table-body" id="tasksList">
             <div class="task-row" data-subject="physics" data-difficulty="easy" data-title="Шайба на вертикальном желубе">
                 <div class="col-id">1</div>
-                <div class="col-title"><a href="{{url_for('main_bp.physic_1')}}" class="task-link">Количество троек</a></div>
-                <div class="col-subject"><span class="subject-tag physics">Математика</span></div>
+                <div class="col-title"><a href="{{url_for('main_bp.physic_1')}}" class="task-link">Максимальное расстояние</a></div>
+                <div class="col-subject"><span class="subject-tag physics">Физика</span></div>
                 <div class="col-difficulty"><span class="difficulty-tag easy">Легкая</span></div>
-                {% if "1" in session.completed_task %}
+                {% if "2" in session.completed_task %}
                 <div class="col-status"><span class="status-tag not-started">Решена!</span></div>
                 {% else %}
                 <div class="col-status"><span class="status-tag not-started">Не решена</span></div>
