@@ -1,12 +1,5 @@
-"""
-что бы поднять: pip install flask-sqlalchemy flask-migrate
-команды:
-add_new_user
-"""
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import foreign
-
 from valid_or_not import email_is_valid
 from bcrypt import gensalt, hashpw, checkpw
 from datetime import datetime
@@ -60,42 +53,89 @@ class User(db.Model):
             return ("error", "Current user does not exist")
 
 
+# Problem: class для добавления задач
 class Problem(db.Model):
     __tablename__ = "problems"
+    """
+    id - id
+    object - объект (математика / физика) | обязательно
+    condition - условие задачи | обязательно
+    right_answer - правильный ответ | обязательно
+    attachment - название фото в папке static/images/ | не обязательно, по умолчанию: ""
+    """
     id = db.Column(db.Integer, primary_key=True)
     object = db.Column(db.String(50), nullable=False)
     condition = db.Column(db.String(500), nullable=False, unique=True)
     right_answer = db.Column(db.String(50), nullable=False)
     attachment = db.Column(db.String(100))
 
+    # add_problem - метод для добавления проблемы
     @staticmethod
-    def add_problem(object, condition, right_answer, attachment):
+    def add_problem(object: str, condition: str, right_answer:str, attachment="") -> tuple:
+        # если проблемы еще нет, то добавляем
         if not Problem.query.filter_by(condition=condition).first():
             new_problem = Problem(object=object, condition=condition, right_answer=right_answer, attachment=attachment)
             db.session.add(new_problem)
             db.session.commit()
             return ("success", "The problem has been added successfully")
         return ("error", "An error occurred or this problem already exists")
+
+    # метод для получения класса с нужной задачей по ее id
     @staticmethod
-    def get_problem(id):
+    def get_problem(id: int):
         problem = Problem.query.filter_by(id=id).first()
         return problem
 
 
+# SolvedProblem: class, для связи юзера и решенных задач
 class SolvedProblem(db.Model):
     __tablename__ = "solvedproblems"
+    """
+    id - id
+    user_id - id юзера в таблице users
+    problem_id - id задачи в таблице problems_id
+    """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    problem_id = db.Column(db.Integer, db.ForeignKey("problems.id"))
+    problem_id = db.Column(db.String, db.ForeignKey("problems.id"))
 
-    # Добавление и проверка решенной задачи в "копилку"
+    # метод для добавления новой задачи
     @staticmethod
-    def add_solved_problem(user_id, user_answer, problem_id):
-        right_answer = Problem.query.filter_by(id=problem_id).first()
-        if user_answer == right_answer.right_answer:
-            solved_problem = SolvedProblem(user_id=user_id, problem_id=problem_id)
+    def add_solved_problem(user_id: int, user_answer: str, problem_id: int) -> tuple:
+        # инициализация двух бд
+        problem = Problem.query.filter_by(id=problem_id).first()
+        solved_problem = SolvedProblem.query.filter_by(user_id=user_id).first()
+        # если ответ верный и у юзера нет верно решенных задач
+        # задачи инициализируются в виде строки: "id_решенной_задачи"
+        print(solved_problem)
+        if user_answer == problem.right_answer and solved_problem is None:
+            solved_problem = SolvedProblem(user_id=user_id, problem_id=str(problem_id))
             db.session.add(solved_problem)
             db.session.commit()
             return ("success", "The problem has been solved")
+        # если ответ верный и у юзера есть решенные задачи
+        # задачи добавляются через запятую в виде "id_решенной_задачи1,id_решенной_задачи2"
+        elif user_answer == problem.right_answer and solved_problem is not None:
+            """
+            solved_problem_data: list
+            solved_problem_data = [id_решенной_задачи1, id_решенной_задачи2]
+            """
+            solved_problem_data = solved_problem.problem_id.split(",")
+            # если задачи нет в решенных, добавляем
+            if problem_id not in solved_problem_data:
+                solved_problem.problem_id = solved_problem.problem_id + "," + str(problem_id)
+                db.session.commit()
+                return ("success", "The problem has been solved in list")
+            # если есть, ошибка: The problem is already solved
+            else:
+                return ("error", "The problem is already solved")
+        # ответ неверный
         return ("error", "Worng answer or error occured")
 
+    # метод для получения всех решенных задач юзера
+    @staticmethod
+    def get_solved_problems(user_id: int) -> list:
+        solved_problems = SolvedProblem.query.filter_by(user_id=user_id).first()
+        if solved_problems is None:
+            return []
+        return solved_problems.problem_id.split(",")

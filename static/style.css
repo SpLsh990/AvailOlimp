@@ -1739,7 +1739,6 @@ h1 {
             margin-bottom: 30px;
         }
 
-        /* Стили для изображения */
         .task-image-container {
             margin: 30px 0;
             text-align: center;
@@ -1759,7 +1758,6 @@ h1 {
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
-        /* Модальное окно для увеличенного фото */
         .modal {
             display: none;
             position: fixed;
@@ -1817,7 +1815,6 @@ h1 {
             }
         }
 
-        /* Форма ответа */
         .answer-form {
             margin: 30px 0;
         }
@@ -1850,7 +1847,6 @@ h1 {
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        /* Кнопки */
         .button-group {
             display: flex;
             gap: 15px;
@@ -1895,7 +1891,6 @@ h1 {
             transform: translateY(-2px);
         }
 
-        /* Уведомления */
         .notification {
             padding: 16px 20px;
             border-radius: 12px;
@@ -1937,8 +1932,6 @@ h1 {
                 transform: translateY(0);
             }
         }
-
-        /* Без фото - текст по центру */
         .no-image {
             text-align: left;
         }

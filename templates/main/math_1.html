@@ -112,14 +112,14 @@
                 {% endif %}
 
                 <!-- Уведомление о правильном ответе -->
-                {% if "2" in session.completed_task %}
+                {% if "1" in session.completed_task %}
                 <div class="notification notification-success">
                     <span class="notification-icon">✓</span>
                     <span class="notification-message">Задача решена!</span>
                 </div>
 
                 <!-- Уведомление о неправильном ответе -->
-                {% elif session.incorrect_answer_2 %}
+                {% elif session.incorrect_answer_1 %}
                 <div class="notification notification-error">
                     <span class="notification-icon">✗</span>
                     <span class="notification-message">Ответ неверный!</span>
@@ -128,12 +128,12 @@
 
                 <!-- Форма ответа -->
                 <form method="POST" class="answer-form">
-                    {% if "2" not in session.completed_task %}
+                    {% if "1" not in session.completed_task %}
                     <label class="answer-label">Твой ответ:</label>
                     <textarea name="answer" class="answer-input" rows="4" placeholder="Введи решение или ответ здесь..."></textarea>
                     {% endif %}
                     <div class="button-group">
-                        {% if "2" not in session.completed_task %}
+                        {% if "1" not in session.completed_task %}
                         <button type="submit" class="submit-btn">Проверить ответ</button>
                         {% endif %}
                         <a href="{{ url_for('main_bp.physics_mode') }}" class="back-btn">← Назад к задачам</a>
