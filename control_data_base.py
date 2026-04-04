@@ -69,10 +69,10 @@ class Problem(db.Model):
     right_answer = db.Column(db.String(50), nullable=False)
     attachment = db.Column(db.String(100))
 
-    # add_problem - метод для добавления проблемы
+    # add_problem - метод для добавления задачи
     @staticmethod
     def add_problem(object: str, condition: str, right_answer:str, attachment="") -> tuple:
-        # если проблемы еще нет, то добавляем
+        # если задачи еще нет, то добавляем
         if not Problem.query.filter_by(condition=condition).first():
             new_problem = Problem(object=object, condition=condition, right_answer=right_answer, attachment=attachment)
             db.session.add(new_problem)
@@ -99,7 +99,7 @@ class SolvedProblem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     problem_id = db.Column(db.String, db.ForeignKey("problems.id"))
 
-    # метод для добавления новой задачи
+    # метод для добавления новой решенной задачи
     @staticmethod
     def add_solved_problem(user_id: int, user_answer: str, problem_id: int) -> tuple:
         # инициализация двух бд
