@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Банк заданий по математике | AvailOlimp</title>
+    <title>Банк заданий по физике | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
 </head>
@@ -90,7 +90,7 @@
 
     <main class="tasks-bank-container">
         <div class="tasks-header">
-            <h1 class="tasks-title">Банк заданий по математике</h1>
+            <h1 class="tasks-title">Банк заданий по физике</h1>
             <div class="tasks-filters">
                 <div class="filter-group">
                     <select class="filter-select" id="difficultyFilter">
@@ -121,7 +121,7 @@
             <div class="table-body" id="tasksList">
                 {% for problem in problems %}
                 <div class="task-row"
-                     data-subject="math"
+                     data-subject="physics"
                      data-difficulty="{{ problem.difficulty }}"
                      data-title="{{ problem.title }}"
                      data-task-id="{{ problem.id }}">
@@ -130,7 +130,7 @@
                         <a href="{{ url_for('main_bp.problem_detail', problem_id=problem.id) }}" class="task-link">{{ problem.title }}</a>
                     </div>
                     <div class="col-subject">
-                        <span class="subject-tag math">Математика</span>
+                        <span class="subject-tag physics">Физика</span>
                     </div>
                     <div class="col-difficulty">
                         <span class="difficulty-tag {{ problem.difficulty }}">

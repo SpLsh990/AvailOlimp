@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }} | AvailOlimp</title>
+    <title>{{ problem.title if problem.title else 'Задача' }} | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
 </head>
 <body>
+    <div class="decor-element decor-1"></div>
+    <div class="decor-element decor-2"></div>
+
     <header>
         <div class="conteiner_for_header">
             <div class="header-left">
@@ -20,8 +23,8 @@
                 <div class="dropdown">
                     <a href="#" class="dropdown-btn">Задачи ▼</a>
                     <div class="dropdown-content">
-                        <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
-                        <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
+                        <a href="{{ url_for('main_bp.subject_mode', subject='physics') }}">Физика</a>
+                        <a href="{{ url_for('main_bp.subject_mode', subject='math') }}">Математика</a>
                     </div>
                 </div>
                 <a href="{{ url_for('main_bp.pvp_mode') }}">Соревновательный режим</a>
@@ -90,20 +93,27 @@
 
     <main class="task-container">
         <div class="task-card">
-            <h1 class="task-title">Сколькими способами можно разделить числа</h1>
+            <h1 class="task-title">{{ problem.title if problem.title else 'Задача' }}</h1>
             <div>
-                <span class="task-subject">{{ subject }}</span>
+                <span class="task-subject">
+                    {% if problem.object == 'physics' %}Физика{% else %}Математика{% endif %}
+                </span>
+                <span class="task-difficulty difficulty-{{ problem.difficulty }}">
+                    {% if problem.difficulty == 'easy' %}Легкая
+                    {% elif problem.difficulty == 'medium' %}Средняя
+                    {% elif problem.difficulty == 'hard' %}Сложная
+                    {% endif %}
+                </span>
             </div>
 
             <div class="task-content">
                 <div class="task-text">
-                    {{ task_text }}
+                    {{ problem.condition | safe }}
                 </div>
 
-                <!-- Блок с изображением (если есть) -->
-                {% if task_image %}
+                {% if problem.attachment %}
                 <div class="task-image-container">
-                    <img src="{{ url_for('main_bp.static', filename=task_image) }}"
+                    <img src="{{ url_for('main_bp.static', filename=problem.attachment) }}"
                          alt="Иллюстрация к задаче"
                          class="task-image"
                          id="taskImage"
@@ -111,33 +121,31 @@
                 </div>
                 {% endif %}
 
-                <!-- Уведомление о правильном ответе -->
-                {% if "1" in session.completed_task %}
+                {% if problem.id|string in session.completed_task %}
                 <div class="notification notification-success">
                     <span class="notification-icon">✓</span>
                     <span class="notification-message">Задача решена!</span>
                 </div>
-
-                <!-- Уведомление о неправильном ответе -->
-                {% elif session.incorrect_answer_1 %}
+                {% elif session.get('incorrect_answer_' ~ problem.id) %}
                 <div class="notification notification-error">
                     <span class="notification-icon">✗</span>
-                    <span class="notification-message">Ответ неверный!</span>
+                    <span class="notification-message">Ответ неверный! Попробуйте еще раз.</span>
                 </div>
                 {% endif %}
 
-                <!-- Форма ответа -->
                 <form method="POST" class="answer-form">
-                    {% if "1" not in session.completed_task %}
+                    {% if problem.id|string not in session.completed_task %}
                     <label class="answer-label">Твой ответ:</label>
                     <textarea name="answer" class="answer-input" rows="4" placeholder="Введи решение или ответ здесь..."></textarea>
-                    {% endif %}
                     <div class="button-group">
-                        {% if "1" not in session.completed_task %}
                         <button type="submit" class="submit-btn">Проверить ответ</button>
-                        {% endif %}
-                        <a href="{{ url_for('main_bp.physics_mode') }}" class="back-btn">← Назад к задачам</a>
+                        <a href="{{ url_for('main_bp.subject_mode', subject='physics') if problem.object == 'physics' else url_for('main_bp.subject_mode', subject='math') }}" class="back-btn">← Назад к задачам</a>
                     </div>
+                    {% else %}
+                    <div class="button-group">
+                        <a href="{{ url_for('main_bp.subject_mode', subject='physics') if problem.object == 'physics' else url_for('main_bp.subject_mode', subject='math') }}" class="back-btn">← Назад к задачам</a>
+                    </div>
+                    {% endif %}
                 </form>
             </div>
         </div>
@@ -153,25 +161,21 @@
 
     <script src="../../static/script.js"></script>
     <script>
-        // Открытие модального окна с увеличенным фото
         function openModal() {
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
             const taskImage = document.getElementById('taskImage');
-
             if (taskImage) {
                 modal.style.display = 'block';
                 modalImg.src = taskImage.src;
             }
         }
 
-        // Закрытие модального окна
         function closeModal() {
             const modal = document.getElementById('imageModal');
             modal.style.display = 'none';
         }
 
-        // Закрытие по Escape
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeModal();

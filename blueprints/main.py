@@ -6,6 +6,7 @@ main_bp = Blueprint('main_bp', __name__,
                     template_folder='../templates/main',
                     static_folder='../static')
 
+
 # главный блок (index, register, login, logout)
 @main_bp.route('/')
 def index():
@@ -58,67 +59,60 @@ def logout():
     session.clear()
     return redirect('/')
 
-# раздел физики
-@main_bp.route('/physics_mode.html')
-def physics_mode():
+
+# Разделы физика или математика
+@main_bp.route('/<subject>_mode.html')
+def subject_mode(subject):
     if session.get('user_id') is None:
         return redirect('/login.html')
-    else:
-        session['completed_task'] = SolvedProblem.get_solved_problems(session['user_id'])
-        print(session['completed_task'])
-        return render_template('physic_mode.html')
+
+    if subject not in ['physics', 'math']:
+        return redirect('/')
+    # Все что с session['completed_task'] это я так понял отладка, ее не трогал
+    session['completed_task'] = SolvedProblem.get_solved_problems(session['user_id'])
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
 
 
-@main_bp.route("/physic_1.html", methods=['GET', 'POST'])
-def physic_1():
+    problems_query = Problem.query.filter_by(object=subject)
+    total = problems_query.count()
+    total_pages = (total + per_page - 1) // per_page
+    offset = (page - 1) * per_page
+    problems = problems_query.offset(offset).limit(per_page).all()
+
+    return render_template(f'{subject}_mode.html',
+                           problems=problems,
+                           current_page=page,
+                           total_pages=total_pages)
+
+
+# "Карточка" с задачей логику оставил
+@main_bp.route("/problem/<int:problem_id>", methods=['GET', 'POST'])
+def problem_detail(problem_id):
     if request.method == 'GET':
-        problem = Problem.get_problem(id=2)
-        return render_template("physic_1.html",
+        problem = Problem.get_problem(id=problem_id)
+        return render_template("problem_detail.html",
+                               problem=problem,
                                subject=problem.object,
                                task_text=problem.condition,
                                task_image=problem.attachment)
 
     elif request.method == 'POST':
         answer = request.form['answer']
-        server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, 2)
+        server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, problem_id)
+
         if server_answer[0] == "success":
             print(server_answer[1])
-            session['completed_task'].append("2")
+            if 'completed_task' not in session:
+                session['completed_task'] = []
+            session['completed_task'].append(str(problem_id))
             session.modified = True
             print(session['completed_task'])
         else:
-            session["incorrect_answer_2"] = True
-    return redirect('/physic_1.html')
-
-# раздел математики
-@main_bp.route('/math_mode.html')
-def math_mode():
-    if session.get('user_id') is None:
-        return redirect('/login.html')
-    else:
-        session['completed_task'] = SolvedProblem.get_solved_problems(session['user_id'])
-        print(session['completed_task'])
-        return render_template('math_mode.html')
-
-@main_bp.route("/math_1.html", methods=['GET', 'POST'])
-def math_1():
-    if request.method == "GET":
-        problem = Problem.get_problem(id=1)
-        return render_template("math_1.html",
-                               subject=problem.object,
-                               task_text=problem.condition,
-                               task_image=problem.attachment)
-    elif request.method == "POST":
-        answer = request.form["answer"]
-        server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, 1)
-        if server_answer[0] == "success":
-            session['completed_task'].append("1")
-            print(session['completed_task'])
+            session[f"incorrect_answer_{problem_id}"] = True
             session.modified = True
-        else:
-            session["incorrect_answer_1"] = True
-        return redirect('/math_1.html')
 
+    return redirect(f'/problem/{problem_id}')
 
 # раздел pvp
 @main_bp.route('/pvp_mode.html')
@@ -127,13 +121,3 @@ def pvp_mode():
         return redirect('/login.html')
     else:
         return render_template('pvp_mode.html')
-
-
-
-"""
-Заготовка для добавления 1 задачи
-problem = Problem.add_problem("math",
-                                      " Сколькими способами из натуральных чисел от 1 до 100 можно выбрать три числа так, чтобы одно из них равнялось среднему арифметическому двух оставшихся?",
-                                      2450,
-                                      "")
-"""

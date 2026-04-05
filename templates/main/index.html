@@ -23,8 +23,8 @@
                 <div class="dropdown">
                     <a href="#" class="dropdown-btn">Задачи ▼</a>
                     <div class="dropdown-content">
-                        <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
-                        <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
+                        <a href="{{ url_for('main_bp.subject_mode', subject='physics') }}">Физика</a>
+                    <a href="{{ url_for('main_bp.subject_mode', subject='math') }}">Математика</a>
                     </div>
                 </div>
                 <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
@@ -102,8 +102,8 @@
         <div class="subjects-block">
             <p>Сейчас на площадке доступны следующие предметы:</p>
             <div class="subject-links">
-                <a href="{{url_for('main_bp.physics_mode')}}" class="subject-link">Физика</a>
-                <a href="{{url_for('main_bp.math_mode')}}" class="subject-link">Математика</a>
+                <a href="{{ url_for('main_bp.subject_mode', subject='physics') }}" class="subject-link">Физика</a>
+                <a href="{{ url_for('main_bp.subject_mode', subject='math') }}" class="subject-link">Математика</a>
             </div>
         </div>
     </div>
