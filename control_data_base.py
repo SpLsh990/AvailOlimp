@@ -86,6 +86,11 @@ class Problem(db.Model):
         problem = Problem.query.filter_by(id=id).first()
         return problem
 
+    @staticmethod
+    def get_random_problem(object: str):
+        random_problem = Problem.query.order_by(object=object).order_by(db.random()).first()
+        return random_problem
+
 
 # SolvedProblem: class, для связи юзера и решенных задач
 class SolvedProblem(db.Model):
