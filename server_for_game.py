@@ -7,7 +7,8 @@
 import redis
 import json
 from flask import Flask, request, jsonify
-from control_data_base import Problem
+from flask_cors import CORS
+from control_data_base import Problem, db
 
 
 r = redis.Redis(
@@ -17,7 +18,14 @@ r = redis.Redis(
     decode_responses=True
 )
 
+
 app = Flask(__name__)
+CORS(app)
+app.config.update(
+        SQLALCHEMY_DATABASE_URI='sqlite:///mydatabase.db',
+        SQLALCHEMY_TRACK_MODIFICATIONS=False
+    )
+db.init_app(app)
 
 # функция для запрос-ответ логики вывода статуса юзера в игре
 def add_user_in_queue(user: str, elo: int, object: str):
@@ -76,6 +84,7 @@ def find_match():
     data = request.json
     user = data.get('user_id')
     elo = data.get('rating', 1000)
+    print(f"Юзер: {user}")
     object = data.get("object")
 
     # ошибка запроса
@@ -88,6 +97,9 @@ def find_match():
         ), 400
 
     result = add_user_in_queue(user, elo, object)
+    print(result)
+    all_players = r.zrange("pvp:queue", 0, -1, withscores=True)
+    print(f"Игроки в очереди {all_players}")
     return jsonify(result)
 
 
@@ -104,7 +116,7 @@ def cancel_search():
         return jsonify(
             {
                 "status": "cancelled",
-                        "message": "Поиск отменен"
+                "message": "Поиск отменен"
             }
         )
 

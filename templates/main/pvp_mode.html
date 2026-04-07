@@ -6,362 +6,6 @@
     <title>Соревновательный режим | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
-    <style>
-        /* Дополнительные стили для соревновательного режима */
-        .pvp-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        /* ELO карточка */
-        .elo-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 30px 40px;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .elo-info {
-            flex: 1;
-        }
-
-        .elo-label {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .elo-value {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff, #cbd5e1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
-        }
-
-        .elo-rank {
-            font-size: 1rem;
-            color: #60a5fa;
-            margin-top: 8px;
-        }
-
-        .elo-stats {
-            display: flex;
-            gap: 30px;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            min-width: 100px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-top: 5px;
-        }
-
-        /* Плашка с правилами */
-        .rules-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .rules-card {
-            background: rgba(26, 31, 46, 0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 28px;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .rules-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .rules-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffffff, #cbd5e1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .close-rules {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-rules:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-            transform: rotate(90deg);
-        }
-
-        .rules-content {
-            padding: 24px;
-            min-height: 300px;
-        }
-
-        .rule-page {
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .rule-page.active {
-            display: block;
-        }
-
-        .rule-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #60a5fa;
-            margin-bottom: 16px;
-        }
-
-        .rule-text {
-            color: #e2e8f0;
-            line-height: 1.7;
-            font-size: 0.95rem;
-        }
-
-        .rule-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .rule-list li {
-            padding: 10px 0;
-            padding-left: 24px;
-            position: relative;
-            color: #cbd5e1;
-        }
-
-        .rule-list li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #4ade80;
-            font-weight: 600;
-        }
-
-        .rules-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-arrow {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 10px 20px;
-            border-radius: 12px;
-            color: #60a5fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-arrow:hover:not(:disabled) {
-            background: rgba(59, 130, 246, 0.4);
-            transform: translateX(-2px);
-        }
-
-        .nav-arrow.next:hover:not(:disabled) {
-            transform: translateX(2px);
-        }
-
-        .nav-arrow:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .page-indicator {
-            color: #94a3b8;
-            font-size: 0.85rem;
-        }
-
-        /* Кнопки выбора предмета */
-        .subjects-section {
-            margin-top: 40px;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .subject-buttons {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .subject-btn {
-            flex: 1;
-            min-width: 250px;
-            padding: 40px 30px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .subject-btn.physics:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: #3b82f6;
-            transform: translateY(-5px);
-        }
-
-        .subject-btn.math:hover {
-            background: rgba(139, 92, 246, 0.15);
-            border-color: #8b5cf6;
-            transform: translateY(-5px);
-        }
-
-        .subject-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .subject-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 10px;
-        }
-
-        .subject-desc {
-            font-size: 0.85rem;
-            color: #94a3b8;
-        }
-
-        .start-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .elo-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 25px;
-            }
-
-            .elo-value {
-                font-size: 2.5rem;
-            }
-
-            .subject-buttons {
-                flex-direction: column;
-            }
-
-            .subject-btn {
-                min-width: auto;
-            }
-
-            .rules-card {
-                width: 95%;
-                margin: 20px;
-            }
-
-            .rules-navigation {
-                padding: 15px 20px;
-            }
-
-            .nav-arrow {
-                padding: 8px 16px;
-                font-size: 0.85rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -557,12 +201,59 @@
     </main>
 
     <script>
-        // Правила - пагинация
-        let currentPage = 0;
-        const pages = document.querySelectorAll('.rule-page');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const pageIndicator = document.getElementById('pageIndicator');
+        // Глобальные функции должны быть определены до их использования
+        function startMatch(subject) {
+            console.log("начало подбора new")
+            const UserData = {
+                user_id: '{{ session.user_id }}',
+                elo: localStorage.getItem('elo') || sessionStorage.getItem('elo') || 1000,
+                object: subject
+            };
+
+            fetch('http://localhost:8001/api/pvp/find', {
+                method: 'POST',           // тип запроса
+                headers: {
+                    'Content-Type': 'application/json'  // говорим, что шлем JSON
+                }, 
+                body: JSON.stringify(UserData)  // превращаем объект в JSON строку
+            })
+            .then(response => response.json())  // получаем ответ
+            .then(data => {
+                if (data.status === 'found') {
+                    console.log('Противник найден!', data.opponent);
+                    console.log('Задача:', data.match.question);
+                } else if (data.status === 'waiting') {
+                    console.log('Ждем противника...');
+                } else {
+                    console.log("Ошибка ответа")
+                }
+            })
+
+            console.log("Начинаем поиск соперника по предмету:", subject);
+        }
+
+        function closeRules() {
+            const overlay = document.getElementById('rulesOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            // Сохраняем в localStorage что пользователь закрыл правила
+            localStorage.setItem('pvp_rules_closed', 'true');
+        }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                updateRules();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateRules();
+            }
+        }
 
         function updateRules() {
             pages.forEach((page, index) => {
@@ -585,35 +276,12 @@
             }
         }
 
-        function nextPage() {
-            if (currentPage < pages.length - 1) {
-                currentPage++;
-                updateRules();
-            }
-        }
-
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                updateRules();
-            }
-        }
-
-        function closeRules() {
-            const overlay = document.getElementById('rulesOverlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            // Сохраняем в localStorage что пользователь закрыл правила
-            localStorage.setItem('pvp_rules_closed', 'true');
-        }
-
-        function startMatch(subject) {
-            // Здесь будет логика начала матча
-            console.log(`Поиск соперника по предмету: ${subject}`);
-            // Можно сделать редирект или показать модалку ожидания
-            alert(`🔍 Поиск соперника по ${subject === 'physics' ? 'Физике' : 'Математике'}...\nСкоро начнется матч!`);
-        }
+        // Правила - пагинация
+        let currentPage = 0;
+        const pages = document.querySelectorAll('.rule-page');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
 
         // Клик вне плашки для закрытия
         document.addEventListener('click', function(event) {
@@ -635,7 +303,9 @@
 
         // Инициализация
         updateRules();
+        
+        // Для отладки - проверяем что скрипт загрузился
+        console.log("Скрипт загружен, функция startMatch доступна");
     </script>
-    <script src="../../static/script.js"></script>
 </body>
 </html>

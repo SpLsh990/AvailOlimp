@@ -3,6 +3,7 @@ from sqlalchemy.orm import foreign
 from valid_or_not import email_is_valid
 from bcrypt import gensalt, hashpw, checkpw
 from datetime import datetime
+import random
 
 db = SQLAlchemy()
 
@@ -87,9 +88,15 @@ class Problem(db.Model):
         return problem
 
     @staticmethod
-    def get_random_problem(object: str):
-        random_problem = Problem.query.order_by(object=object).order_by(db.random()).first()
-        return random_problem
+    def get_random_problem(subject: str):
+        """Получить случайную задачу по предмету"""
+        # Получаем все задачи с нужным предметом
+        problems = Problem.query.filter_by(object=subject).all()
+
+        if problems:
+            # Выбираем случайную задачу
+            task = random.choice(problems)
+            return task.condition
 
 
 # SolvedProblem: class, для связи юзера и решенных задач
