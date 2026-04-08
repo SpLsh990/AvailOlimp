@@ -62,7 +62,6 @@ class Problem(db.Model):
     title - название | обязательно
     condition - условие задачи | обязательно
     right_answer - правильный ответ | обязательно
-    difficulty - сложность задачи | по умолчанию - easy
     attachment - название фото в папке static/images/ | не обязательно, по умолчанию: ""
     """
     id = db.Column(db.Integer, primary_key=True)
@@ -70,17 +69,15 @@ class Problem(db.Model):
     title = db.Column(db.String(50), nullable=False)
     condition = db.Column(db.String(500), nullable=False, unique=True)
     right_answer = db.Column(db.String(50), nullable=False)
-    difficulty = db.Column(db.String(50), nullable=False, default="easy")
     attachment = db.Column(db.String(100))
 
     # add_problem - метод для добавления задачи
     @staticmethod
-    def add_problem(object: str, title: str, condition: str, right_answer: str, difficulty="easy",
+    def add_problem(object: str, title: str, condition: str, right_answer: str,
                     attachment="") -> tuple:
         # если задачи еще нет, то добавляем
         if not Problem.query.filter_by(condition=condition).first():
-            new_problem = Problem(object=object, title=title, condition=condition, right_answer=right_answer,
-                                  difficulty=difficulty, attachment=attachment)
+            new_problem = Problem(object=object, title=title, condition=condition, right_answer=right_answer, attachment=attachment)
             db.session.add(new_problem)
             db.session.commit()
             return ("success", "The problem has been added successfully")
