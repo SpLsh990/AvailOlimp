@@ -6,7 +6,7 @@
 
 import redis
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from control_data_base import Problem, db
 
@@ -26,6 +26,7 @@ app.config.update(
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 db.init_app(app)
+
 
 # функция для запрос-ответ логики вывода статуса юзера в игре
 def add_user_in_queue(user: str, elo: int, object: str):
@@ -47,6 +48,7 @@ def add_user_in_queue(user: str, elo: int, object: str):
     for i in range(len(queue) // 2):
         user_1, user_2 = queue[i * 2][0], queue[i * 2 + 1][0]
         problem = Problem.get_random_problem(object)
+        print(problem)
         match_1 = {
             "with_whom": user_2,
             "task": problem
@@ -55,8 +57,8 @@ def add_user_in_queue(user: str, elo: int, object: str):
             "with_whom": user_1,
             "task": problem
         }
-        r.setex(f"pvp:queue:{user_1}", 600, json.dumps(match_1))
-        r.setex(f"pvp:queue:{user_2}", 600, json.dumps(match_2))
+        r.setex(f"pvp:queue:{user_1}", 5, json.dumps(match_1))
+        r.setex(f"pvp:queue:{user_2}", 5, json.dumps(match_2))
         r.zrem("pvp:queue", user_1)
         r.zrem("pvp:queue", user_2)
 
@@ -97,7 +99,9 @@ def find_match():
         ), 400
 
     result = add_user_in_queue(user, elo, object)
+    return result
     print(result)
+
     all_players = r.zrange("pvp:queue", 0, -1, withscores=True)
     print(f"Игроки в очереди {all_players}")
     return jsonify(result)

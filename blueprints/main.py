@@ -13,6 +13,7 @@ def index():
         return render_template('index.html',
                                title="AvailOlimp", main_bp=main_bp)
     else:
+
         session.clear()
         return render_template('index.html',
                                title="AvailOlimp", main_bp=main_bp)

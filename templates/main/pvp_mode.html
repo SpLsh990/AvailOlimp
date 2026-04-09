@@ -202,35 +202,207 @@
 
     <script>
         // Глобальные функции должны быть определены до их использования
-        function startMatch(subject) {
-            console.log("начало подбора new")
+        async function response_to_server(subject) {
+            console.log("начало подбора")
             const UserData = {
                 user_id: '{{ session.user_id }}',
                 elo: localStorage.getItem('elo') || sessionStorage.getItem('elo') || 1000,
                 object: subject
             };
 
-            fetch('http://localhost:8001/api/pvp/find', {
-                method: 'POST',           // тип запроса
+            const response = await fetch('http://localhost:8001/api/pvp/find', {
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'  // говорим, что шлем JSON
-                }, 
-                body: JSON.stringify(UserData)  // превращаем объект в JSON строку
-            })
-            .then(response => response.json())  // получаем ответ
-            .then(data => {
-                if (data.status === 'found') {
-                    console.log('Противник найден!', data.opponent);
-                    console.log('Задача:', data.match.question);
-                } else if (data.status === 'waiting') {
-                    console.log('Ждем противника...');
-                } else {
-                    console.log("Ошибка ответа")
-                }
-            })
-
-            console.log("Начинаем поиск соперника по предмету:", subject);
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(UserData)
+            });
+            
+            const data = await response.json();
+            return data;
         }
+
+        function startMatch(subject) {
+        // Показываем загрузку
+        showLoading();
+        
+        let searchInterval = null;
+        let isSearching = true;
+        
+        async function search() {
+            try {
+                const response = await response_to_server(subject);
+                
+                if (response.status === "found") {
+                    // Останавливаем поиск
+                    isSearching = false;
+                    if (searchInterval) clearInterval(searchInterval);
+                    
+                    // Обновляем загрузку на "найден"
+                    updateLoadingToFound(response.opponent, response.match);
+                    
+                    console.log(`✅ Противник найден: ${response.opponent}`);
+                    console.log(`📚 Задача:`, response.match);
+                    
+                    // Через 2 секунды убираем окно и переходим в игру
+                    setTimeout(() => {
+                        console.log("Внутри setTimeout")
+                        hideLoading();
+                        startGame(response);
+                    }, 2000);
+                    
+                } else if (response.status === "waiting") {
+                    console.log("⏳ Ждем соперника...");
+                    updateLoadingText();
+                    
+                } else {
+                    console.log("❌ Ошибка:", response);
+                    // При ошибке показываем сообщение и продолжаем поиск
+                }
+            } catch (error) {
+                console.error("Ошибка запроса:", error);
+                updateLoadingError();
+            }
+            
+            // Продолжаем поиск
+            if (isSearching) {
+                searchInterval = setTimeout(search, 2000);
+            }
+        }
+        
+        // Запускаем поиск
+        search();
+    }
+
+    function startGame(response) {
+        console.log("Запуск startGame")
+        document.body.innerHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+        </head>
+        `;
+    }
+
+    function showLoading() {
+        // Удаляем старый оверлей если есть
+        const oldOverlay = document.getElementById('pvpLoadingOverlay');
+        if (oldOverlay) oldOverlay.remove();
+        
+        // Создаем оверлей
+        const overlay = document.createElement('div');
+        overlay.id = 'pvpLoadingOverlay';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+            <div class="loading-card">
+                <div class="spinner"></div>
+                <div class="loading-text" id="loadingText">
+                    🔍 Ищем соперника...
+                </div>
+                <div id="loadingDetail" style="font-size: 14px; color: #666; margin-top: 10px;">
+                    ⏳ Поиск может занять до 30 секунд
+                </div>
+                <button id="cancelSearchBtn" style="margin-top: 20px; padding: 8px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    ❌ Отменить поиск
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Обработчик отмены
+        document.getElementById('cancelSearchBtn').onclick = function() {
+            cancelSearch();
+            hideLoading();
+            console.log("Поиск отменен пользователем");
+        };
+    }
+
+    function updateLoadingText() {
+        const textElement = document.getElementById('loadingText');
+        if (textElement) {
+            const messages = [
+                "🔍 Ищем соперника...",
+                "🔄 Проверяем очередь...",
+                "⚡ Подбираем противника...",
+                "🎯 Почти нашли...",
+                "⏳ Ожидаем соперника..."
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            textElement.innerHTML = randomMessage;
+        }
+    }
+
+    function updateLoadingToFound(opponent, task) {
+        const overlay = document.getElementById('pvpLoadingOverlay');
+        if (!overlay) return;
+        
+        const card = overlay.querySelector('.loading-card');
+        const spinner = overlay.querySelector('.spinner');
+        const textElement = document.getElementById('loadingText');
+        const detailElement = document.getElementById('loadingDetail');
+        const cancelBtn = document.getElementById('cancelSearchBtn');
+        
+        // Убираем спиннер, показываем галочку
+        if (spinner) spinner.style.display = 'none';
+        
+        // Добавляем галочку
+        const checkmark = document.createElement('div');
+        checkmark.innerHTML = '✅';
+        checkmark.style.fontSize = '48px';
+        checkmark.style.margin = '20px auto';
+        card.insertBefore(checkmark, textElement);
+        
+        // Обновляем текст
+        if (textElement) {
+            textElement.innerHTML = `🎉 Противник найден!<br><span style="font-size: 16px;">Противник: ${opponent}</span>`;
+            textElement.classList.add('found-message');
+        }
+        
+        if (detailElement) {
+            detailElement.innerHTML = '🏆 Перенаправляем в игру...';
+        }
+        
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        
+        // Добавляем анимацию
+        card.style.border = '2px solid #28a745';
+    }
+
+function updateLoadingError() {
+    const textElement = document.getElementById('loadingText');
+    if (textElement) {
+        textElement.innerHTML = '⚠️ Ошибка соединения<br><span style="font-size: 14px;">Повторяем попытку...</span>';
+    }
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('pvpLoadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+async function cancelSearch() {
+    try {
+        const UserData = {
+            user_id: '{{ session.user_id }}'
+        };
+        
+        await fetch('http://localhost:8001/api/pvp/cancel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(UserData)
+        });
+        
+        console.log("Поиск отменен на сервере");
+    } catch (error) {
+        console.error("Ошибка отмены:", error);
+    }
+}
+
 
         function closeRules() {
             const overlay = document.getElementById('rulesOverlay');
