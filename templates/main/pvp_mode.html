@@ -205,8 +205,8 @@
         async function response_to_server(subject) {
             console.log("начало подбора")
             const UserData = {
-                user_id: '{{ session.user_id }}',
-                elo: localStorage.getItem('elo') || sessionStorage.getItem('elo') || 1000,
+                user_id: '{{ session.nickname }}',
+                elo: '{{ session.elo }}',
                 object: subject
             };
 
@@ -275,14 +275,359 @@
     }
 
     function startGame(response) {
-        console.log("Запуск startGame")
-        document.body.innerHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-        </head>
-        `;
+    console.log("Запуск startGame", response);
+    
+    // Очищаем body и устанавливаем новый стиль
+    document.body.innerHTML = '';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+    document.body.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+    document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
+    document.body.style.minHeight = '100vh';
+    document.body.style.position = 'relative';
+    
+    // Добавляем анимированный фон (частицы)
+    function createParticles() {
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = (Math.random() * 6 + 2) + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = 'rgba(59, 130, 246, 0.3)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.pointerEvents = 'none';
+            particle.style.animation = `floatParticle ${Math.random() * 15 + 10}s linear infinite`;
+            particle.style.opacity = Math.random() * 0.5;
+            document.body.appendChild(particle);
+        }
     }
+    
+    // Добавляем CSS анимации
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    createParticles();
+    
+    // Получаем данные из response
+    const opponent = response.opponent || 'Неизвестен';
+    const opponentAvatar = opponent.charAt(0).toUpperCase();
+    const taskText = response.match || 'Загрузка задачи...';
+    const taskImage = response.task_image || null;
+    const currentQuestion = response.current_question || 1;
+    const totalQuestions = response.total_questions || 3;
+    const yourScore = response.your_score || 0;
+    const opponentScore = response.opponent_score || 0;
+    const timeLeft = response.time_left || 300;
+    const yourElo = response.your_elo || 1000;
+    const opponentElo = response.opponent_elo || 1000;
+    
+    // Формируем HTML
+    const html = `
+        <div style="position: relative; z-index: 10; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+            <div style="max-width: 900px; width: 100%; background: rgba(26, 31, 46, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; animation: fadeInUp 0.6s ease-out; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                
+                <!-- Шапка матча -->
+                <div style="padding: 30px 30px 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; margin-bottom: 15px;">⚔️ LIVE MATCH ⚔️</div>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <!-- Ты -->
+                        <div style="flex: 1; min-width: 150px; text-align: center; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 20px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <div style="width: 70px; height: 70px; margin: 0 auto 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);">Я</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #60a5fa; margin-bottom: 5px;">Вы</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8;">ELO: ${yourElo}</div>
+                        </div>
+                        <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 10px;">VS</div>
+                        <!-- Соперник -->
+                        <div style="flex: 1; min-width: 150px; text-align: center; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                            <div style="width: 70px; height: 70px; margin: 0 auto 12px; background: linear-gradient(135deg, #8b5cf6, #c084fc); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">${opponentAvatar}</div>
+                            <div style="font-size: 1.1rem; font-weight: 600; color: #c084fc; margin-bottom: 5px;">${escapeHtml(opponent)}</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8;">ELO: ${opponentElo}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Основной контент -->
+                <div style="padding: 30px;">
+                    <!-- Информация о матче -->
+                    <div style="background: rgba(59, 130, 246, 0.08); border-radius: 20px; padding: 20px; margin-bottom: 30px; border: 1px solid rgba(59, 130, 246, 0.15);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #94a3b8;">
+                                <span>📋 Вопрос</span>
+                                <span style="font-size: 1.2rem; font-weight: 700; color: #60a5fa;">${currentQuestion}</span>
+                                <span>/</span>
+                                <span>${totalQuestions}</span>
+                            </div>
+                            <div id="timer" style="display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 1.2rem; font-weight: 700; padding: 8px 16px; background: rgba(0, 0, 0, 0.3); border-radius: 40px;">
+                                ⏱️ <span id="timerSeconds">${formatTime(timeLeft)}</span>
+                            </div>
+                            <div style="display: flex; gap: 15px;">
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #94a3b8;">
+                                    🎯 <span id="yourScore" style="font-size: 1.1rem; font-weight: 700; color: #ffffff;">${yourScore}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #94a3b8;">
+                                    🏆 <span id="opponentScore" style="font-size: 1.1rem; font-weight: 700; color: #ffffff;">${opponentScore}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Задача -->
+                    <div style="margin-bottom: 30px;">
+                        <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; margin-bottom: 15px;">📖 ЗАДАЧА</div>
+                        <div style="background: rgba(0, 0, 0, 0.3); border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                            <div id="taskText" style="font-size: 1.1rem; line-height: 1.7; color: #e2e8f0; margin-bottom: 20px;">${escapeHtml(taskText)}</div>
+                            ${taskImage ? `
+                            <div style="margin-top: 20px; text-align: center;">
+                                <img id="taskImage" src="${taskImage}" alt="Иллюстрация" style="max-width: 100%; max-height: 300px; border-radius: 16px; cursor: pointer; transition: transform 0.3s;" onclick="openImageModal()">
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- Форма ответа -->
+                    <div style="margin-bottom: 30px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #cbd5e1; margin-bottom: 12px;">✏️ ТВОЙ ОТВЕТ</label>
+                        <textarea id="myInput" rows="3" style="width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 1rem; font-family: monospace; resize: vertical; box-sizing: border-box;" placeholder="Введи ответ или решение здесь..."></textarea>
+                    </div>
+                    
+                    <button id="checkButton" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 16px; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; position: relative; overflow: hidden;" onclick="window.passAnswer(response)">✅ ПРОВЕРИТЬ ОТВЕТ</button>
+                    
+                    <div id="result" style="background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 15px 20px; display: none;"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.innerHTML = html;
+    
+    // Добавляем глобальные функции
+    window.passAnswer = function(response) {
+        const answer = document.getElementById('myInput').value;
+        const checkBtn = document.getElementById('checkButton');
+        const resultDiv = document.getElementById('result');
+        
+        if (!answer.trim()) {
+            showResult(false, 'Пожалуйста, введи ответ!');
+            return;
+        }
+        
+        checkBtn.disabled = true;
+        checkBtn.style.opacity = '0.5';
+        checkBtn.textContent = '⏳ ПРОВЕРКА...';
+        
+        // Вызываем твою существующую функцию отправки ответа
+        if (typeof window.sendAnswer === 'function') {
+            window.sendAnswer(answer);
+        } else {
+            // Заглушка для теста
+            setTimeout(() => {
+                showResult(true, 'Отлично! Ответ верный! +1 очко');
+                checkBtn.disabled = false;
+                checkBtn.style.opacity = '1';
+                checkBtn.textContent = '✅ ПРОВЕРИТЬ ОТВЕТ';
+                document.getElementById('myInput').value = '';
+            }, 1000);
+        }
+    };
+    
+    window.showResult = function(isCorrect, message) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.style.animation = 'slideIn 0.3s ease-out';
+        
+        if (isCorrect) {
+            resultDiv.style.background = 'rgba(34, 197, 94, 0.15)';
+            resultDiv.style.border = '1px solid rgba(34, 197, 94, 0.3)';
+            resultDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px; font-weight: 500; color: #4ade80;"><span>✅</span><span>${message || 'Правильный ответ! +1 очко'}</span></div>`;
+        } else {
+            resultDiv.style.background = 'rgba(239, 68, 68, 0.12)';
+            resultDiv.style.border = '1px solid rgba(239, 68, 68, 0.25)';
+            resultDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px; font-weight: 500; color: #f87171;"><span>❌</span><span>${message || 'Неправильный ответ. Попробуй еще раз!'}</span></div>`;
+        }
+        
+        setTimeout(() => {
+            resultDiv.style.display = 'none';
+        }, 3000);
+    };
+    
+    window.updateMatchData = function(data) {
+        if (data.your_score !== undefined) {
+            const yourScoreEl = document.getElementById('yourScore');
+            if (yourScoreEl) yourScoreEl.textContent = data.your_score;
+        }
+        if (data.opponent_score !== undefined) {
+            const opponentScoreEl = document.getElementById('opponentScore');
+            if (opponentScoreEl) opponentScoreEl.textContent = data.opponent_score;
+        }
+        if (data.current_question !== undefined) {
+            const currentQEl = document.querySelector('#currentQuestion');
+            if (currentQEl) currentQEl.textContent = data.current_question;
+        }
+        if (data.time_left !== undefined) {
+            const timerSeconds = document.getElementById('timerSeconds');
+            if (timerSeconds) timerSeconds.textContent = formatTime(data.time_left);
+            
+            const timerDiv = document.getElementById('timer');
+            if (timerDiv) {
+                if (data.time_left <= 60) {
+                    timerDiv.style.color = '#f87171';
+                    timerDiv.style.animation = 'pulse 0.5s infinite';
+                } else if (data.time_left <= 120) {
+                    timerDiv.style.color = '#facc15';
+                    timerDiv.style.animation = 'none';
+                } else {
+                    timerDiv.style.color = '#ffffff';
+                    timerDiv.style.animation = 'none';
+                }
+            }
+        }
+        if (data.task !== undefined) {
+            const taskTextEl = document.getElementById('taskText');
+            if (taskTextEl) taskTextEl.innerHTML = escapeHtml(data.task);
+        }
+        if (data.task_image !== undefined && data.task_image) {
+            let taskImg = document.getElementById('taskImage');
+            if (!taskImg) {
+                const taskCard = document.querySelector('.task-card');
+                if (taskCard) {
+                    const imgDiv = document.createElement('div');
+                    imgDiv.style.marginTop = '20px';
+                    imgDiv.style.textAlign = 'center';
+                    imgDiv.innerHTML = `<img id="taskImage" src="${data.task_image}" alt="Иллюстрация" style="max-width: 100%; max-height: 300px; border-radius: 16px; cursor: pointer;" onclick="openImageModal()">`;
+                    taskCard.appendChild(imgDiv);
+                }
+            } else {
+                taskImg.src = data.task_image;
+            }
+        }
+        
+        // Активируем кнопку после обновления
+        const checkBtn = document.getElementById('checkButton');
+        if (checkBtn) {
+            checkBtn.disabled = false;
+            checkBtn.style.opacity = '1';
+            checkBtn.textContent = '✅ ПРОВЕРИТЬ ОТВЕТ';
+        }
+        
+        // Очищаем поле ввода
+        const inputField = document.getElementById('myInput');
+        if (inputField) inputField.value = '';
+    };
+    
+    window.openImageModal = function() {
+        const taskImg = document.getElementById('taskImage');
+        if (taskImg && taskImg.src) {
+            const modal = document.createElement('div');
+            modal.id = 'imageModal';
+            modal.style.cssText = 'position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); cursor: pointer; display: flex; justify-content: center; align-items: center;';
+            modal.onclick = function() { modal.remove(); };
+            modal.innerHTML = `
+                <div style="position: absolute; top: 20px; right: 40px; font-size: 40px; color: white; cursor: pointer;">&times;</div>
+                <img src="${taskImg.src}" style="max-width: 90%; max-height: 90%; border-radius: 16px;">
+            `;
+            document.body.appendChild(modal);
+        }
+    };
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+    
+    // Запускаем таймер если передан time_left
+    if (timeLeft && timeLeft > 0) {
+        let remaining = timeLeft;
+        const timerInterval = setInterval(() => {
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                return;
+            }
+            remaining--;
+            const timerSeconds = document.getElementById('timerSeconds');
+            const timerDiv = document.getElementById('timer');
+            if (timerSeconds) timerSeconds.textContent = formatTime(remaining);
+            if (timerDiv) {
+                if (remaining <= 60) {
+                    timerDiv.style.color = '#f87171';
+                    timerDiv.style.animation = 'pulse 0.5s infinite';
+                } else if (remaining <= 120) {
+                    timerDiv.style.color = '#facc15';
+                    timerDiv.style.animation = 'none';
+                }
+            }
+        }, 1000);
+    }
+}
+
+    // Добавьте эту функцию после startGame'
+    function passAnwer() {
+        let response = checkAnswer(
+            opponent
+        )
+        console.log(response.status);
+    }
+
+
+        async function checkAnswer() {
+            var answer = document.getElementById('myInput').value;
+            console.log("Ответ:", answer);
+            console.log("начало отправки");
+            const TaskKeys = {
+                user_id: '{{ session.user_id }}',
+                his_answer: answer,
+            };
+
+            const response = await fetch('http://localhost:8001/api/pvp/check_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(UserData)
+            });
+            
+            const data = await response.json();
+            return data;
+        }
+
+    
 
     function showLoading() {
         // Удаляем старый оверлей если есть
@@ -369,48 +714,47 @@
         card.style.border = '2px solid #28a745';
     }
 
-function updateLoadingError() {
-    const textElement = document.getElementById('loadingText');
-    if (textElement) {
-        textElement.innerHTML = '⚠️ Ошибка соединения<br><span style="font-size: 14px;">Повторяем попытку...</span>';
+    function updateLoadingError() {
+        const textElement = document.getElementById('loadingText');
+        if (textElement) {
+            textElement.innerHTML = '⚠️ Ошибка соединения<br><span style="font-size: 14px;">Повторяем попытку...</span>';
+        }
     }
-}
 
-function hideLoading() {
-    const overlay = document.getElementById('pvpLoadingOverlay');
-    if (overlay) {
-        overlay.remove();
+    function hideLoading() {
+        const overlay = document.getElementById('pvpLoadingOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
     }
-}
 
-async function cancelSearch() {
-    try {
-        const UserData = {
-            user_id: '{{ session.user_id }}'
-        };
-        
-        await fetch('http://localhost:8001/api/pvp/cancel', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(UserData)
-        });
-        
-        console.log("Поиск отменен на сервере");
-    } catch (error) {
-        console.error("Ошибка отмены:", error);
+    async function cancelSearch() {
+        try {
+            const UserData = {
+                user_id: '{{ session.user_id }}'
+            };
+            
+            await fetch('http://localhost:8001/api/pvp/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(UserData)
+            });
+            
+            console.log("Поиск отменен на сервере");
+        } catch (error) {
+            console.error("Ошибка отмены:", error);
+        }
     }
-}
 
-
-        function closeRules() {
-            const overlay = document.getElementById('rulesOverlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            // Сохраняем в localStorage что пользователь закрыл правила
-            localStorage.setItem('pvp_rules_closed', 'true');
+    function closeRules() {
+        const overlay = document.getElementById('rulesOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+        // Сохраняем в localStorage что пользователь закрыл правила
+        localStorage.setItem('pvp_rules_closed', 'true');
         }
 
         function nextPage() {

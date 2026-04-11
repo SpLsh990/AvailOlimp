@@ -86,8 +86,8 @@ def find_match():
     data = request.json
     user = data.get('user_id')
     elo = data.get('rating', 1000)
-    print(f"Юзер: {user}")
     object = data.get("object")
+    print(f"User: {user} Elo: {elo} Object: {object}")
 
     # ошибка запроса
     if not user:
