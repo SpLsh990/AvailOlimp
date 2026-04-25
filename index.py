@@ -1,6 +1,7 @@
 import flask
 from blueprints.main import main_bp
 from control_data_base import db
+from add_problems import add_problems
 
 
 def create_app():
@@ -21,9 +22,8 @@ def create_app():
 
     with app.app_context():
         db.create_all()
-
+        add_problems()
     app.register_blueprint(main_bp)
-
     return app
 
 

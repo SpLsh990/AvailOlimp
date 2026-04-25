@@ -73,7 +73,6 @@ def subject_mode(subject):
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
-
     problems_query = Problem.query.filter_by(object=subject)
     total = problems_query.count()
     total_pages = (total + per_page - 1) // per_page
@@ -113,6 +112,7 @@ def problem_detail(problem_id):
             session.modified = True
 
     return redirect(f'/problem/{problem_id}')
+
 
 # раздел pvp
 @main_bp.route('/pvp_mode.html')
