@@ -37,7 +37,7 @@ def add_user_in_queue(user: str, elo: int, object: str):
         return {
             "status": "found",
             "opponent": match_info["with_whom"],
-            "match": match_info["task"]
+            "match": match_info["task"][0]
         }
     # проверка на наличие юзера в очереди на игру
     if r.zscore("pvp:queue", user) is None:
@@ -57,8 +57,8 @@ def add_user_in_queue(user: str, elo: int, object: str):
             "with_whom": user_1,
             "task": problem
         }
-        r.setex(f"pvp:queue:{user_1}", 5, json.dumps(match_1))
-        r.setex(f"pvp:queue:{user_2}", 5, json.dumps(match_2))
+        r.setex(f"pvp:queue:{user_1}", 305, json.dumps(match_1))
+        r.setex(f"pvp:queue:{user_2}", 305, json.dumps(match_2))
         r.zrem("pvp:queue", user_1)
         r.zrem("pvp:queue", user_2)
 
@@ -73,12 +73,29 @@ def add_user_in_queue(user: str, elo: int, object: str):
             return {
                 "status": "found",
                 "opponent": match_info["with_whom"],
-                "match": match_info["task"]
+                "match": match_info["task"][0]
             }
         # костыль, не нужен, но на всякий
         else:
             return {"status": "waiting"}
 
+def check_right_answer(user, answer):
+    response = r.get(f"pvp:queue:{user}")
+
+    if response:
+        queue_info = json.loads(response)
+        id_task = queue_info["task"][1]
+        request_for_check_answer = Problem.check_right_answer(id_task, answer)
+        return {
+            "status": request_for_check_answer[0],
+            "info": request_for_check_answer[1]
+        }
+
+    else:
+        return {
+            "status": "error",
+            "info": "math is not found"
+        }
 
 # функция для приема запроса на игру
 @app.route('/api/pvp/find', methods=['POST'])
@@ -100,12 +117,6 @@ def find_match():
 
     result = add_user_in_queue(user, elo, object)
     return result
-    print(result)
-
-    all_players = r.zrange("pvp:queue", 0, -1, withscores=True)
-    print(f"Игроки в очереди {all_players}")
-    return jsonify(result)
-
 
 # функция отмены игры
 @app.route('/api/pvp/cancel', methods=['POST'])
@@ -124,6 +135,7 @@ def cancel_search():
             }
         )
 
+
     # если матч начался, ошибка
     match_key = r.get(f"pvp:queue:{user}")
     if match_key:
@@ -131,5 +143,14 @@ def cancel_search():
 
     # костыль, но пусть будет
     return jsonify({"status": "not_found", "message": "Вас нет в очереди"})
+
+@app.route('/api/pvp/check_answer', methods=["POST"])
+def check_answer():
+    data = request.json
+    user = data.get("user_id")
+    answer = data.get("his_answer")
+    respond = check_right_answer(user, answer)
+    print(respond)
+    return respond
 
 app.run(host="0.0.0.0", port=8001)

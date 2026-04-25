@@ -415,7 +415,7 @@
                         <textarea id="myInput" rows="3" style="width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 1rem; font-family: monospace; resize: vertical; box-sizing: border-box;" placeholder="Введи ответ или решение здесь..."></textarea>
                     </div>
                     
-                    <button id="checkButton" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 16px; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; position: relative; overflow: hidden;" onclick="window.passAnswer(response)">✅ ПРОВЕРИТЬ ОТВЕТ</button>
+                    <button id="checkButton" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 16px; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; position: relative; overflow: hidden;" onclick="window.passAnswer()">✅ ПРОВЕРИТЬ ОТВЕТ</button>
                     
                     <div id="result" style="background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 15px 20px; display: none;"></div>
                 </div>
@@ -426,7 +426,8 @@
     document.body.innerHTML = html;
     
     // Добавляем глобальные функции
-    window.passAnswer = function(response) {
+    window.passAnswer = async function() {
+        console.log("from window");
         const answer = document.getElementById('myInput').value;
         const checkBtn = document.getElementById('checkButton');
         const resultDiv = document.getElementById('result');
@@ -439,20 +440,16 @@
         checkBtn.disabled = true;
         checkBtn.style.opacity = '0.5';
         checkBtn.textContent = '⏳ ПРОВЕРКА...';
-        
-        // Вызываем твою существующую функцию отправки ответа
-        if (typeof window.sendAnswer === 'function') {
-            window.sendAnswer(answer);
+        console.log(answer);
+        const respond = await checkAnswer(answer);
+        console.log("passAnswer", respond)
+        if (respond["status"] == "success") {
+            showResult(true);
         } else {
-            // Заглушка для теста
-            setTimeout(() => {
-                showResult(true, 'Отлично! Ответ верный! +1 очко');
-                checkBtn.disabled = false;
-                checkBtn.style.opacity = '1';
-                checkBtn.textContent = '✅ ПРОВЕРИТЬ ОТВЕТ';
-                document.getElementById('myInput').value = '';
-            }, 1000);
+            showResult(false);
         }
+
+
     };
     
     window.showResult = function(isCorrect, message) {
@@ -463,7 +460,7 @@
         if (isCorrect) {
             resultDiv.style.background = 'rgba(34, 197, 94, 0.15)';
             resultDiv.style.border = '1px solid rgba(34, 197, 94, 0.3)';
-            resultDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px; font-weight: 500; color: #4ade80;"><span>✅</span><span>${message || 'Правильный ответ! +1 очко'}</span></div>`;
+            resultDiv.innerHTML = `<div style="display: flex; align-items: center; gap: 12px; font-weight: 500; color: #4ade80;"><span>✅</span><span>${message || 'Правильный ответ!'}</span></div>`;
         } else {
             resultDiv.style.background = 'rgba(239, 68, 68, 0.12)';
             resultDiv.style.border = '1px solid rgba(239, 68, 68, 0.25)';
@@ -597,33 +594,27 @@
     }
 }
 
-    // Добавьте эту функцию после startGame'
-    function passAnwer() {
-        let response = checkAnswer(
-            opponent
-        )
-        console.log(response.status);
-    }
 
 
-        async function checkAnswer() {
-            var answer = document.getElementById('myInput').value;
+        async function checkAnswer(answer) {
             console.log("Ответ:", answer);
             console.log("начало отправки");
             const TaskKeys = {
-                user_id: '{{ session.user_id }}',
+                user_id: '{{ session.nickname }}',
                 his_answer: answer,
             };
+            console.log("User:", '{{ session.user_id }}')
 
             const response = await fetch('http://localhost:8001/api/pvp/check_answer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(UserData)
+                body: JSON.stringify(TaskKeys)
             });
             
             const data = await response.json();
+            console.log("checkAnswer", data)
             return data;
         }
 

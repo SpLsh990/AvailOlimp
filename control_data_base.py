@@ -96,7 +96,17 @@ class Problem(db.Model):
         if problems:
             # Выбираем случайную задачу
             task = random.choice(problems)
-            return task.condition
+            return (task.condition, task.id)
+
+    @staticmethod
+    def check_right_answer(id_task, answer):
+        try:
+            problem = Problem.query.filter_by(id=id_task).first()
+            if problem.right_answer == answer:
+                return ("success", "answer is correct")
+            return ("error", "answer not is correct")
+        except Exception as e:
+            return str(e)
 
 
 # SolvedProblem: class, для связи юзера и решенных задач
