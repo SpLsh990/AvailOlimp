@@ -1,20 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}} | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
-    <title>{{title}}</title>
 </head>
 <body>
-<div class="decor-element decor-1"></div>
-<div class="decor-element decor-2"></div>
-
 <header>
     <div class="conteiner_for_header">
         <div class="header-left">
-            <a href="{{url_for('main_bp.index')}}" class="logo">
+            <a href="{{ url_for('main_bp.index') }}" class="logo">
                 <img src="{{ url_for('main_bp.static', filename='images/logo.png') }}"
                      alt="AvailOlimp Logo"
                      class="logo-img">
@@ -27,20 +23,17 @@
                     <a href="{{ url_for('main_bp.subject_mode', subject='math') }}">Математика</a>
                 </div>
             </div>
-            <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
+            <a href="{{ url_for('main_bp.pvp_mode') }}">Соревновательный режим</a>
         </div>
         <div class="header-right">
-            {% if session.user_id %}
             <div class="profile-dropdown">
                 <div class="profile-avatar" id="profileAvatar">
                     <div class="avatar-circle">
                         {{ session.nickname[0]|upper if session.nickname else 'U' }}
                     </div>
                     <span class="profile-name">{{ session.nickname }}</span>
-                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round"/>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2"/>
                     </svg>
                 </div>
                 <div class="profile-dropdown-menu" id="profileDropdownMenu">
@@ -55,50 +48,67 @@
                         </div>
                     </div>
                     <a href="{{ url_for('main_bp.profile') }}" class="dropdown-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="currentColor"
-                                  stroke-width="2" stroke-linecap="round"/>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="currentColor" stroke-width="2"/>
                             <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Мой профиль
                     </a>
                     <a href="{{ url_for('main_bp.logout') }}" class="dropdown-item logout-item">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                             <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
-                                  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                  stroke-linejoin="round"/>
-                            <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                  stroke="currentColor" stroke-width="2"/>
+                            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2"/>
+                            <path d="M21 12H9" stroke="currentColor" stroke-width="2"/>
                         </svg>
                         Выйти
                     </a>
                 </div>
             </div>
-            {% else %}
-            <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
-            <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
-            {% endif %}
         </div>
     </div>
 </header>
 
-<div class="conteiner_for_main_text">
-    {% if session.user_id %}
-    <h1>Привет, {{ session.nickname }}!</h1>
-    {% else %}
-    <h1>Привет!</h1>
-    {% endif %}
-    <p>Это площадка, которая позволит тебе прокачивать свои навыки в решении олимпиадных задач по профильным
-        предметам</p>
+<main class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar-large">
+                <div class="avatar-circle-large">
+                    {{ session.nickname[0]|upper if session.nickname else 'U' }}
+                </div>
+            </div>
+            <h1 class="profile-nickname">{{ session.nickname }}</h1>
+            <p class="profile-email">{{ session.email }}</p>
+        </div>
 
-    <div class="subjects-block">
-        <p>Сейчас на площадке доступны следующие предметы:</p>
-        <div class="subject-links">
-            <a href="{{ url_for('main_bp.subject_mode', subject='physics') }}" class="subject-link">Физика</a>
-            <a href="{{ url_for('main_bp.subject_mode', subject='math') }}" class="subject-link">Математика</a>
+        <div class="profile-info">
+            <div class="info-group">
+                <label>ID пользователя:</label>
+                <p>{{ session.user_id }}</p>
+            </div>
+            <div class="info-group">
+                <label>Email:</label>
+                <p>{{ session.email }}</p>
+            </div>
+            <div class="info-group">
+                <label>Имя пользователя</label>
+                <p>{{ session.nickname }}</p>
+            </div>
+            <div class="info-group">
+                <label>Дата регистрации</label>
+                <p>{{ user.register_day }}</p>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="/" class="back-button">
+                Вернуться в главное меню
+            </a>
         </div>
     </div>
-</div>
+</main>
+
 <script src="../../static/script.js"></script>
+
 </body>
 </html>

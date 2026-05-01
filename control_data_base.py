@@ -15,7 +15,7 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     nickname = db.Column(db.String(100), nullable=False, unique=True)
     elo = db.Column(db.Integer, default=-1)
-    register_day = db.Column(db.DateTime, default=lambda: datetime.now().replace(second=0, microsecond=0))
+    register_day = db.Column(db.DateTime, default=lambda: datetime.now().replace(microsecond=0))
     last_entry = db.Column(db.DateTime, nullable=False,
                            default=lambda: datetime.now().replace(second=0, microsecond=0))
 
@@ -45,12 +45,13 @@ class User(db.Model):
         exist_user = User.query.filter_by(email=result).first()
         if exist_user:
             if checkpw(password.encode(), exist_user.password):
-                exist_user.last_entry = datetime.now().replace(second=0, microsecond=0)
+                exist_user.last_entry = datetime.now().replace(microsecond=0)
                 db.session.commit()
                 return ("success", exist_user)
             else:
                 return ("error", "Wrong answer")
         else:
+            print("Current user does not exist")
             return ("error", "Current user does not exist")
 
 

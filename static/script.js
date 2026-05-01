@@ -1,72 +1,92 @@
 if (window.innerWidth <= 768) {
-        const dropdown = document.querySelector('.dropdown');
-        const dropdownBtn = document.querySelector('.dropdown-btn');
+    const dropdown = document.querySelector('.dropdown');
+    const dropdownBtn = document.querySelector('.dropdown-btn');
 
-        if (dropdownBtn) {
-            dropdownBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                dropdown.classList.toggle('active');
-            });
+    if (dropdownBtn) {
+        dropdownBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle('active');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (dropdown && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('active');
         }
+    });
+}
 
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
-            }
-        });
-    }
 
-    const profileAvatar = document.getElementById('profileAvatar');
-    const profileDropdownMenu = document.getElementById('profileDropdownMenu');
+const profileAvatar = document.getElementById('profileAvatar');
+const profileDropdownMenu = document.getElementById('profileDropdownMenu');
 
-    if (profileAvatar && profileDropdownMenu) {
-        profileAvatar.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdownMenu.classList.toggle('active');
-        });
+if (profileAvatar && profileDropdownMenu) {
+    profileAvatar.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileDropdownMenu.classList.toggle('active');
+    });
 
-        document.addEventListener('click', (e) => {
-            if (!profileAvatar.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
-                profileDropdownMenu.classList.remove('active');
-            }
-        });
-    }
-const subjectFilter = document.getElementById('subjectFilter');
-const difficultyFilter = document.getElementById('difficultyFilter');
-const searchInput = document.getElementById('searchTask');
-    const tasksList = document.getElementById('tasksList');
+    document.addEventListener('click', (e) => {
+        if (!profileAvatar.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
+            profileDropdownMenu.classList.remove('active');
+        }
+    });
+}
+
+
+function addHoverEffect() {
+    const style = document.createElement('style');
+    style.textContent = `
+        .task-row {
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        .task-row:hover {
+            background-color: rgba(59, 130, 246, 0.1) !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+
+function makeTaskRowsClickable() {
     const taskRows = document.querySelectorAll('.task-row');
+    
+    taskRows.forEach(row => {
+        if (row.hasAttribute('data-clickable')) return;
+        
+        const taskLink = row.querySelector('.task-link');
+        if (taskLink) {
+            const url = taskLink.getAttribute('href');
+            
+            row.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'A' && !e.target.closest('a')) {
+                    window.location.href = url;
+                }
+            });
+            
+            row.setAttribute('data-clickable', 'true');
+        }
+    });
+}
 
-    function filterTasks() {
-        const subject = subjectFilter.value;
-        const difficulty = difficultyFilter.value;
-        const searchTerm = searchInput.value.toLowerCase();
 
-        taskRows.forEach(row => {
-            const subjectTag = row.querySelector('.subject-tag');
-            const difficultyTag = row.querySelector('.difficulty-tag');
-            const title = row.querySelector('.col-title').textContent.toLowerCase();
+addHoverEffect();
 
-            let show = true;
+document.addEventListener('DOMContentLoaded', function() {
+    makeTaskRowsClickable();
+});
 
-            if (subject !== 'all') {
-                const subjectClass = subjectTag.classList.contains(subject === 'physics' ? 'physics' : 'math');
-                if (!subjectClass) show = false;
-            }
 
-            if (difficulty !== 'all') {
-                const difficultyClass = difficultyTag.classList.contains(difficulty);
-                if (!difficultyClass) show = false;
-            }
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            makeTaskRowsClickable();
+        }
+    });
+});
 
-            if (searchTerm && !title.includes(searchTerm)) {
-                show = false;
-            }
-
-            row.style.display = show ? 'flex' : 'none';
-        });
-    }
-
-    subjectFilter.addEventListener('change', filterTasks);
-    difficultyFilter.addEventListener('change', filterTasks);
-    searchInput.addEventListener('input', filterTasks);
+const tasksTable = document.querySelector('.table-body');
+if (tasksTable) {
+    observer.observe(tasksTable, { childList: true, subtree: true });
+}

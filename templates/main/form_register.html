@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../static/style.css">
     <title>{{title}} | Регистрация</title>
+    <style>
+        /* Стили для подсказки о пароле */
+        .password-hint {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-top: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .password-hint-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+        }
+
+        .password-hint-item.valid {
+            color: #4ade80;
+        }
+
+        .password-hint-item.invalid {
+            color: #f87171;
+        }
+
+        .hint-icon {
+            font-size: 0.8rem;
+        }
+
+        .password-hint-title {
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-bottom: 3px;
+            color: #94a3b8;
+        }
+    </style>
 </head>
 <body>
 <div class="decor-element decor-1"></div>
@@ -29,9 +66,14 @@
 <main class="register-container">
     <div class="register-card">
         <h2>Создать аккаунт</h2>
-        <p class="register-subtitle">Присоединяйся к сообществу олимпиадников</p>
 
-        <form method="post" class="register-form">
+        <div id="errorMessage" style="display: none;">
+            <div class="error-message">
+                <span id="errorText"></span>
+            </div>
+        </div>
+
+        <form id="registerForm" class="register-form">
             <div class="input-group">
                 <label for="email">Электронная почта</label>
                 <div class="input-email">
@@ -44,16 +86,43 @@
                 <div class="input-password">
                     <input type="password" id="password" name="password" placeholder="··········" required>
                 </div>
-            </div>
-
-            <div class="input-group">
-                <label for="nickname">Никнейм</label>
-                <div class="input-email">
-                    <input type="text" id="nickname" name="nickname" placeholder="LutiyPetya" required>
+                <!-- Подсказка о требованиях к паролю -->
+                <div class="password-hint">
+                    <div class="password-hint-title">Пароль должен содержать:</div>
+                    <div class="password-hint-item" id="hintLength">
+                        <span class="hint-icon">•</span>
+                        <span>Не менее 6 символов</span>
+                    </div>
+                    <div class="password-hint-item" id="hintLatin">
+                        <span class="hint-icon">•</span>
+                        <span>Только латинские буквы (A-Z, a-z)</span>
+                    </div>
+                    <div class="password-hint-item" id="hintDigits">
+                        <span class="hint-icon">•</span>
+                        <span>Хотя бы одну цифру (0-9)</span>
+                    </div>
+                    <div class="password-hint-item" id="hintSpecial">
+                        <span class="hint-icon">•</span>
+                        <span>Хотя бы один спецсимвол (!@#$%^&* и т.д.)</span>
+                    </div>
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">
+            <div class="input-group">
+                <label for="confirmPassword">Подтвердите пароль</label>
+                <div class="input-password">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="··········" required>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="nickname">Имя пользователя</label>
+                <div class="input-email">
+                    <input type="text" id="nickname" name="nickname" placeholder="ExampleNickname" required>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">
                 Регистрация
             </button>
         </form>
@@ -81,5 +150,221 @@
         </p>
     </div>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registerForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const nicknameInput = document.getElementById('nickname');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorContainer = document.getElementById('errorMessage');
+        const errorTextSpan = document.getElementById('errorText');
+
+        const hintLength = document.getElementById('hintLength');
+        const hintLatin = document.getElementById('hintLatin');
+        const hintDigits = document.getElementById('hintDigits');
+        const hintSpecial = document.getElementById('hintSpecial');
+
+        function showError(message) {
+            errorTextSpan.textContent = message;
+            errorContainer.style.display = 'block';
+
+            setTimeout(() => {
+                errorContainer.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideError() {
+            errorContainer.style.display = 'none';
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function updatePasswordHints() {
+            const password = passwordInput.value;
+
+            const isValidLength = password.length >= 6;
+            updateHint(hintLength, isValidLength);
+
+            const hasLatinLetters = /[a-zA-Z]/.test(password);
+            updateHint(hintLatin, hasLatinLetters);
+
+            const hasDigits = /\d/.test(password);
+            updateHint(hintDigits, hasDigits);
+
+            const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+            updateHint(hintSpecial, hasSpecialChars);
+
+            const hasOnlyValidChars = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/.test(password);
+            if (password && !hasOnlyValidChars) {
+                showError('Пароль может содержать только латинские буквы, цифры и специальные символы');
+            }
+        }
+
+        function updateHint(element, isValid) {
+            if (isValid) {
+                element.classList.remove('invalid');
+                element.classList.add('valid');
+                element.querySelector('.hint-icon').textContent = '✓';
+            } else {
+                element.classList.remove('valid');
+                element.classList.add('invalid');
+                element.querySelector('.hint-icon').textContent = '•';
+            }
+        }
+
+        function isValidPassword(password) {
+            const hasLatinLetters = /[a-zA-Z]/.test(password);
+            const hasDigits = /\d/.test(password);
+            const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+            const hasOnlyValidChars = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/.test(password);
+
+            return password.length >= 6 && hasLatinLetters && hasDigits && hasSpecialChars && hasOnlyValidChars;
+        }
+
+        function isValidNickname(nickname) {
+            return nickname.trim().length >= 3;
+        }
+
+        passwordInput.addEventListener('input', function() {
+            updatePasswordHints();
+            hideError();
+        });
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+            const nickname = nicknameInput.value.trim();
+
+            if (!email) {
+                showError('Пожалуйста, введите email');
+                emailInput.focus();
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('Пожалуйста, введите корректный email адрес');
+                emailInput.focus();
+                return;
+            }
+
+            if (!password) {
+                showError('Пожалуйста, введите пароль');
+                passwordInput.focus();
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Пароль должен содержать минимум 6 символов');
+                passwordInput.focus();
+                return;
+            }
+
+            const hasOnlyValidChars = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]+$/.test(password);
+            if (!hasOnlyValidChars) {
+                showError('Пароль может содержать только латинские буквы, цифры и специальные символы');
+                passwordInput.focus();
+                return;
+            }
+
+            const hasLatinLetters = /[a-zA-Z]/.test(password);
+            const hasDigits = /\d/.test(password);
+            const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+
+            if (!hasLatinLetters) {
+                showError('Пароль должен содержать хотя бы одну латинскую букву (A-Z, a-z)');
+                passwordInput.focus();
+                return;
+            }
+
+            if (!hasDigits) {
+                showError('Пароль должен содержать хотя бы одну цифру (0-9)');
+                passwordInput.focus();
+                return;
+            }
+
+            if (!hasSpecialChars) {
+                showError('Пароль должен содержать хотя бы один специальный символ (!@#$%^&* и т.д.)');
+                passwordInput.focus();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Пароли не совпадают');
+                confirmPasswordInput.focus();
+                return;
+            }
+
+            if (!nickname) {
+                showError('Пожалуйста, введите имя пользователя');
+                nicknameInput.focus();
+                return;
+            }
+
+            if (!isValidNickname(nickname)) {
+                showError('Имя пользователя должно содержать минимум 3 символа');
+                nicknameInput.focus();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'Регистрация...';
+
+            hideError();
+
+            try {
+                const response = await fetch('/form_register.html', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        nickname: nickname
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    if (data.message === 'User already exists') {
+                        showError('Пользователь с таким email или именем пользователя уже существует');
+                    } else if (data.message === 'Invalid email format') {
+                        showError('Неверный формат email');
+                    } else {
+                        showError(data.message || 'Ошибка регистрации. Попробуйте позже.');
+                    }
+
+                    passwordInput.value = '';
+                    confirmPasswordInput.value = '';
+                    updatePasswordHints();
+                    passwordInput.focus();
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Произошла ошибка сервера. Попробуйте позже.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
+
+        emailInput.addEventListener('input', hideError);
+        confirmPasswordInput.addEventListener('input', hideError);
+        nicknameInput.addEventListener('input', hideError);
+    });
+</script>
 </body>
 </html>

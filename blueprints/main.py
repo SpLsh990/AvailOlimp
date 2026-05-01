@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Blueprint, request, session, redirect
+from flask import Flask, render_template, Blueprint, request, session, redirect, jsonify
 from control_data_base import User, Problem, SolvedProblem
 
 # зависимости
@@ -25,33 +25,84 @@ def register():
         return render_template('form_register.html', title="Register Form", main_bp=main_bp)
 
     elif request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        nickname = request.form['nickname']
-        answer = User.register_user(email, password, nickname)
-        if answer[0] == "success":
-            session['user_id'] = answer[1]
-            session['nickname'] = nickname
-            return redirect('/')
-        return answer
+        if request.is_json:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+            nickname = data.get('nickname')
+
+            answer = User.register_user(email, password, nickname)
+
+            if answer[0] == "success":
+                session['user_id'] = answer[1]
+                session['email'] = email
+                session['nickname'] = nickname
+                return jsonify({
+                    'success': True,
+                    'redirect_url': '/'
+                })
+            else:
+                error_message = answer[1]
+                return jsonify({
+                    'success': False,
+                    'message': error_message
+                }), 400
+        else:
+            # Старая обработка, для совместимости
+            email = request.form['email']
+            password = request.form['password']
+            nickname = request.form['nickname']
+
+            answer = User.register_user(email, password, nickname)
+
+            if answer[0] == "success":
+                session['user_id'] = answer[1]
+                session['email'] = email
+                session['nickname'] = nickname
+                return redirect('/')
+            else:
+                session['register_error'] = answer[1]
+                return redirect('/form_register.html')
 
 
 @main_bp.route('/login.html', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html', title="Login Form", main_bp=main_bp)
+
     elif request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        answer = User.login_user(email, password)
-        if answer[0] == "success":
-            session['user_id'] = answer[1].id
-            session['email'] = email
-            session['nickname'] = answer[1].nickname
-            return redirect('/')
+        if request.is_json:
+            data = request.get_json()
+            email = data.get('email')
+            password = data.get('password')
+
+            answer = User.login_user(email, password)
+            if answer[0] == "success":
+                session['user_id'] = answer[1].id
+                session['email'] = email
+                session['nickname'] = answer[1].nickname
+                return jsonify({
+                    'success': True,
+                    'redirect_url': '/'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': answer[1]
+                }), 401
         else:
-            session['error_password_email'] = True
-            return redirect('/login.html')
+            # Также оставил для совместимости
+            email = request.form['email']
+            password = request.form['password']
+            answer = User.login_user(email, password)
+            if answer[0] == "success":
+                session['user_id'] = answer[1].id
+                session['email'] = email
+                session['nickname'] = answer[1].nickname
+                return redirect('/')
+            else:
+                session['error_password_email'] = True
+                return redirect('/login.html')
 
 
 @main_bp.route('/logout.html')
@@ -113,7 +164,17 @@ def problem_detail(problem_id):
 
     return redirect(f'/problem/{problem_id}')
 
-
+# Профиль
+@main_bp.route('/profile.html')
+def profile():
+    if session.get('user_id') is None:
+        return redirect('/login.html')
+    user = User.query.get(session['user_id'])
+    print(f"user: {user}")
+    return render_template('profile.html',
+                           title="Мой профиль",
+                           user=user,
+                           main_bp=main_bp)
 # раздел pvp
 @main_bp.route('/pvp_mode.html')
 def pvp_mode():

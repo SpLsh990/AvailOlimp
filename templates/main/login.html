@@ -28,33 +28,32 @@
 <main class="register-container">
     <div class="register-card">
         <h2>Войти в аккаунт</h2>
-        <p class="register-subtitle">Присоединяйся к сообществу олимпиадников</p>
-        <div>
-            {% if session.error_password_email %}
+
+        <div id="errorMessage" style="display: none;">
             <div class="error-message">
-                <span>Не верная почта или пароль</span>
+                <span id="errorText">Неверная почта или пароль</span>
             </div>
-            {% else %}
-            <p></p>
-            {% endif %}
         </div>
 
-        <form method="post" class="register-form">
+        <form id="loginForm" class="register-form">
             <div class="input-group">
                 <label for="email">Электронная почта</label>
                 <div class="input-email">
                     <input type="email" id="email" name="email" placeholder="your@email.ru" required>
+                </div>
+            </div>
 
-                    <div class="input-group">
-                        <label for="password">Пароль</label>
-                        <div class="input-password">
-                            <input type="password" id="password" name="password" placeholder="··········" required>
-                        </div>
+            <div class="input-group">
+                <label for="password">Пароль</label>
+                <div class="input-password">
+                    <input type="password" id="password" name="password" placeholder="··········" required>
+                </div>
+            </div>
 
-                        <button type="submit" class="submit-btn">
-                            Войти
-                        </button>
-                </form>
+            <button type="submit" id="submitBtn" class="submit-btn">
+                Войти
+            </button>
+        </form>
 
         <div class="divider">
             <span>или</span>
@@ -79,5 +78,109 @@
         </p>
     </div>
 </main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorContainer = document.getElementById('errorMessage');
+        const errorTextSpan = document.getElementById('errorText');
+
+        function showError(message) {
+            errorTextSpan.textContent = message;
+            errorContainer.style.display = 'block';
+
+            setTimeout(() => {
+                errorContainer.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideError() {
+            errorContainer.style.display = 'none';
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email) {
+                showError('Пожалуйста, введите email');
+                emailInput.focus();
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('Пожалуйста, введите корректный email адрес');
+                emailInput.focus();
+                return;
+            }
+
+            if (!password) {
+                showError('Пожалуйста, введите пароль');
+                passwordInput.focus();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'Вход...';
+
+            hideError();
+
+            try {
+                const response = await fetch('/login.html', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.href = data.redirect_url || '/';
+                } else {
+                    if (data.message === 'Current user does not exist') {
+                        showError('Пользователь с таким email не найден');
+                        emailInput.focus();
+                    } else if (data.message === 'Wrong answer') {
+                        showError('Неверный пароль');
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                    } else if (data.message === 'Invalid email format') {
+                        showError('Неверный формат email');
+                        emailInput.focus();
+                    } else {
+                        showError(data.message || 'Неверная почта или пароль');
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError('Произошла ошибка сервера. Попробуйте позже.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
+
+        emailInput.addEventListener('input', hideError);
+        passwordInput.addEventListener('input', hideError);
+    });
+</script>
 </body>
 </html>
