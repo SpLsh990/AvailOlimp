@@ -118,7 +118,7 @@ class SolvedProblem(db.Model):
         # если ответ верный и у юзера нет верно решенных задач
         # задачи инициализируются в виде строки: "id_решенной_задачи"
         print(solved_problem)
-        user_answer = user_answer.replace(".", ",")  # Чтобы было неваажно, через запятую или точку вводить ответы
+        user_answer = user_answer.replace(".", ",").rstrip()  # Чтобы было неважно, через запятую или точку вводить ответы
         if user_answer == problem.right_answer and solved_problem is None:
             solved_problem = SolvedProblem(user_id=user_id, problem_id=str(problem_id))
             db.session.add(solved_problem)
