@@ -1,3 +1,4 @@
+import os
 import flask
 from blueprints.main import main_bp
 from control_data_base import db
@@ -7,14 +8,18 @@ from add_problems import add_problems
 def create_app():
     app = flask.Flask(__name__)
 
-    # Добавляем конфигурацию
-    app.secret_key = "secret key"
+    app.secret_key = os.environ.get('SECRET_KEY', 'secret key')
+
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url and database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
     app.config.update(
         SESSION_TYPE='filesystem',
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SECURE=False,
+        SESSION_COOKIE_SECURE=os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true',
         PERMANENT_SESSION_LIFETIME=3600,
-        SQLALCHEMY_DATABASE_URI='sqlite:///mydatabase.db',
+        SQLALCHEMY_DATABASE_URI=database_url or 'sqlite:///mydatabase.db',  # 🆕
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 
@@ -23,10 +28,12 @@ def create_app():
     with app.app_context():
         db.create_all()
         add_problems()
+
     app.register_blueprint(main_bp)
     return app
 
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
