@@ -11,15 +11,22 @@ def create_app():
     app.secret_key = os.environ.get('SECRET_KEY', 'secret key')
 
     database_url = os.environ.get('DATABASE_URL')
+
+    # Для Render
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+    # Для локальной разработки
+    if not database_url:
+        database_url = 'sqlite:///mydatabase.db'
+        print("Warning: Using SQLite database. Set DATABASE_URL for PostgreSQL.")
 
     app.config.update(
         SESSION_TYPE='filesystem',
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SECURE=os.environ.get('SESSION_COOKIE_SECURE', 'False').lower() == 'true',
         PERMANENT_SESSION_LIFETIME=3600,
-        SQLALCHEMY_DATABASE_URI=database_url or 'sqlite:///mydatabase.db',  # 🆕
+        SQLALCHEMY_DATABASE_URI=database_url,
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 
