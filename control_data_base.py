@@ -3,7 +3,7 @@ from sqlalchemy.orm import foreign
 from valid_or_not import email_is_valid
 from bcrypt import gensalt, hashpw, checkpw
 from datetime import datetime
-import re
+import random
 
 db = SQLAlchemy()
 
@@ -15,6 +15,8 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     nickname = db.Column(db.String(100), nullable=False, unique=True)
     elo = db.Column(db.Integer, default=-1)
+    winner = db.Column(db.Integer, default=0)
+    loser = db.Column(db.Integer, default=0)
     register_day = db.Column(db.DateTime, default=lambda: datetime.now().replace(microsecond=0))
     last_entry = db.Column(db.DateTime, nullable=False,
                            default=lambda: datetime.now().replace(microsecond=0))
@@ -52,6 +54,22 @@ class User(db.Model):
                 return ("error", "Wrong answer")
         else:
             return ("error", "Current user does not exist")
+
+    @staticmethod
+    def add_rating(nickname, num):
+        user = User.query.filter_by(nickname=nickname).first()
+        user.elo += num
+        db.session.commit()
+
+    @staticmethod
+    def add_match(nickname, results):
+        user = User.query.filter_by(nickname=nickname).first()
+        if results:
+            user.winner += 1
+            db.session.commit()
+        else:
+            user.loser += 1
+            db.session.commit()
 
 
 # Problem: class для добавления задач
@@ -92,9 +110,32 @@ class Problem(db.Model):
         return problem
 
     @staticmethod
-    def get_random_problem(object: str):
-        random_problem = Problem.query.order_by(object=object).order_by(db.random()).first()
-        return random_problem
+    def get_random_problem(subject: str):
+        """Получить случайную задачу по предмету"""
+        subject = f"{subject}_pvp"
+        problems = Problem.query.filter_by(object=subject).all()
+
+        if problems:
+            task = random.choice(problems)
+            return (task.condition, task.id)
+        else:
+            return ("Задача не найдена")
+
+    @staticmethod
+    def check_right_answer(id_task, answer):
+        try:
+            problem = Problem.query.filter_by(id=id_task).first()
+            if problem.right_answer == answer:
+                return {
+                    "status": "success",
+                    "message": "answer is correct"
+                }
+            return {
+                "status": "error",
+                "message": "answer not is correct"
+            }
+        except Exception as e:
+            return str(e)
 
 
 # SolvedProblem: class, для связи юзера и решенных задач

@@ -6,452 +6,87 @@
     <title>Соревновательный режим | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
-    <style>
-        /* Дополнительные стили для соревновательного режима */
-        .pvp-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        /* ELO карточка */
-        .elo-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 30px 40px;
-            margin-bottom: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .elo-info {
-            flex: 1;
-        }
-
-        .elo-label {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .elo-value {
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ffffff, #cbd5e1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1;
-        }
-
-        .elo-rank {
-            font-size: 1rem;
-            color: #60a5fa;
-            margin-top: 8px;
-        }
-
-        .elo-stats {
-            display: flex;
-            gap: 30px;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            min-width: 100px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-top: 5px;
-        }
-
-        /* Плашка с правилами */
-        .rules-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .rules-card {
-            background: rgba(26, 31, 46, 0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 28px;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .rules-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .rules-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffffff, #cbd5e1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .close-rules {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-rules:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #f87171;
-            transform: rotate(90deg);
-        }
-
-        .rules-content {
-            padding: 24px;
-            min-height: 300px;
-        }
-
-        .rule-page {
-            display: none;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .rule-page.active {
-            display: block;
-        }
-
-        .rule-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #60a5fa;
-            margin-bottom: 16px;
-        }
-
-        .rule-text {
-            color: #e2e8f0;
-            line-height: 1.7;
-            font-size: 0.95rem;
-        }
-
-        .rule-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .rule-list li {
-            padding: 10px 0;
-            padding-left: 24px;
-            position: relative;
-            color: #cbd5e1;
-        }
-
-        .rule-list li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #4ade80;
-            font-weight: 600;
-        }
-
-        .rules-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .nav-arrow {
-            background: rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 10px 20px;
-            border-radius: 12px;
-            color: #60a5fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-arrow:hover:not(:disabled) {
-            background: rgba(59, 130, 246, 0.4);
-            transform: translateX(-2px);
-        }
-
-        .nav-arrow.next:hover:not(:disabled) {
-            transform: translateX(2px);
-        }
-
-        .nav-arrow:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .page-indicator {
-            color: #94a3b8;
-            font-size: 0.85rem;
-        }
-
-        /* Кнопки выбора предмета */
-        .subjects-section {
-            margin-top: 40px;
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .subject-buttons {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .subject-btn {
-            flex: 1;
-            min-width: 250px;
-            padding: 40px 30px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .subject-btn.physics:hover {
-            background: rgba(59, 130, 246, 0.15);
-            border-color: #3b82f6;
-            transform: translateY(-5px);
-        }
-
-        .subject-btn.math:hover {
-            background: rgba(139, 92, 246, 0.15);
-            border-color: #8b5cf6;
-            transform: translateY(-5px);
-        }
-
-        .subject-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .subject-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 10px;
-        }
-
-        .subject-desc {
-            font-size: 0.85rem;
-            color: #94a3b8;
-        }
-
-        .start-btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 24px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 40px;
-            color: white;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .elo-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 25px;
-            }
-
-            .elo-value {
-                font-size: 2.5rem;
-            }
-
-            .subject-buttons {
-                flex-direction: column;
-            }
-
-            .subject-btn {
-                min-width: auto;
-            }
-
-            .rules-card {
-                width: 95%;
-                margin: 20px;
-            }
-
-            .rules-navigation {
-                padding: 15px 20px;
-            }
-
-            .nav-arrow {
-                padding: 8px 16px;
-                font-size: 0.85rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <header>
-        <div class="conteiner_for_header">
-            <div class="header-left">
-                <a href="{{ url_for('main_bp.index') }}" class="logo">
-                    <img src="{{ url_for('main_bp.static', filename='images/logo.png') }}"
-                         alt="AvailOlimp Logo"
-                         class="logo-img">
-                    <span class="logo-text">AvailOlimp</span>
-                </a>
-                <div class="dropdown">
-                    <a href="#" class="dropdown-btn">Задачи ▼</a>
-                    <div class="dropdown-content">
-                        <a href="{{ url_for('main_bp.physics_mode') }}">Физика</a>
-                        <a href="{{ url_for('main_bp.math_mode') }}">Математика</a>
-                    </div>
+    <div class="conteiner_for_header">
+        <div class="header-left">
+            <a href="{{url_for('main_bp.index')}}" class="logo">
+                <img src="{{ url_for('main_bp.static', filename='images/logo.png') }}"
+                     alt="AvailOlimp Logo"
+                     class="logo-img">
+                <span class="logo-text">AvailOlimp</span>
+            </a>
+            <div class="dropdown">
+                <a href="#" class="dropdown-btn">Задачи ▼</a>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('main_bp.subject_mode', subject='physics') }}">Физика</a>
+                    <a href="{{ url_for('main_bp.subject_mode', subject='math') }}">Математика</a>
                 </div>
-                <a href="{{ url_for('main_bp.pvp_mode') }}">Соревновательный режим</a>
             </div>
-            <div class="header-right">
-                {% if session.user_id %}
-                <div class="profile-dropdown">
-                    <div class="profile-avatar" id="profileAvatar">
-                        <div class="avatar-circle">
+            <a href="{{url_for('main_bp.pvp_mode')}}">Соревновательный режим</a>
+        </div>
+        <div class="header-right">
+            {% if session.user_id %}
+            <div class="profile-dropdown">
+                <div class="profile-avatar" id="profileAvatar">
+                    <div class="avatar-circle">
+                        {{ session.nickname[0]|upper if session.nickname else 'U' }}
+                    </div>
+                    <span class="profile-name">{{ session.nickname }}</span>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                              stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="profile-dropdown-menu" id="profileDropdownMenu">
+                    <div class="profile-dropdown-header">
+                        <div class="dropdown-avatar-circle">
                             {{ session.nickname[0]|upper if session.nickname else 'U' }}
                         </div>
-                        <span class="profile-name">{{ session.nickname }}</span>
-                        <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </div>
-                    <div class="profile-dropdown-menu" id="profileDropdownMenu">
-                        <div class="profile-dropdown-header">
-                            <div class="dropdown-avatar-circle">
-                                {{ session.nickname[0]|upper if session.nickname else 'U' }}
-                            </div>
-                            <div class="dropdown-user-info">
-                                <div class="dropdown-username">{{ session.nickname }}</div>
-                                <div class="dropdown-email">{{ session.email if session.email else 'user@example.com' }}</div>
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-username">{{ session.nickname }}</div>
+                            <div class="dropdown-email">{{ session.email if session.email else 'user@example.com' }}
                             </div>
                         </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="#" class="dropdown-item">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="currentColor" stroke-width="2"/>
-                                <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            Мой профиль
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 12H15M9 16H15M17 21H7C5.9 21 5 20.1 5 19V5C5 3.9 5.9 3 7 3H17C18.1 3 19 3.9 19 5V19C19 20.1 18.1 21 17 21Z" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            Мои решения
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2"/>
-                                <path d="M19.4 15.05L18.3 14.85C18.1 14.8 17.9 14.7 17.7 14.6C17.5 14.5 17.3 14.4 17.1 14.2C16.9 14 16.8 13.8 16.7 13.6C16.6 13.4 16.5 13.1 16.5 12.9V12.1C16.5 11.9 16.6 11.6 16.7 11.4C16.8 11.2 16.9 11 17.1 10.8C17.3 10.6 17.5 10.5 17.7 10.4C17.9 10.3 18.1 10.2 18.3 10.2L19.4 9.95C19.6 9.9 19.8 9.8 19.9 9.7C20 9.6 20.1 9.5 20.1 9.3C20.3 8.8 20.4 8.3 20.4 7.8C20.4 7.3 20.3 6.8 20.1 6.3C20 6.1 19.9 6 19.8 5.9C19.7 5.8 19.5 5.7 19.3 5.7L18.2 6.1C18 6.2 17.8 6.2 17.6 6.2C17.4 6.2 17.2 6.1 17 6C16.8 5.9 16.7 5.8 16.5 5.6C16.3 5.4 16.2 5.2 16.1 5C16 4.8 15.9 4.6 15.9 4.4V3.4C15.9 3.2 15.9 3 15.8 2.8C15.7 2.6 15.6 2.4 15.4 2.2C14.9 1.8 14.5 1.5 13.9 1.3C13.3 1.1 12.7 1 12 1C11.3 1 10.7 1.1 10.1 1.3C9.5 1.5 9 1.8 8.5 2.2C8.3 2.4 8.2 2.6 8.1 2.8C8 3 7.9 3.2 7.9 3.4V4.4C7.9 4.6 7.9 4.8 7.8 5C7.7 5.2 7.6 5.4 7.4 5.6C7.2 5.8 7 5.9 6.8 6C6.6 6.1 6.4 6.2 6.2 6.2L5.1 5.8C4.9 5.7 4.7 5.7 4.5 5.8C4.3 5.9 4.1 6 3.9 6.1C3.8 6.2 3.7 6.3 3.6 6.5C3.5 6.7 3.5 6.9 3.5 7.1C3.2 7.6 3.1 8.1 3.1 8.6C3.1 9.1 3.2 9.6 3.5 10.1C3.6 10.3 3.7 10.4 3.8 10.5C3.9 10.6 4.1 10.7 4.3 10.7L5.4 11C5.6 11.1 5.8 11.2 6 11.3C6.2 11.4 6.4 11.5 6.6 11.7C6.8 11.9 6.9 12.1 7 12.3C7.1 12.5 7.2 12.7 7.2 12.9V13.7C7.2 13.9 7.1 14.2 7 14.4C6.9 14.6 6.8 14.8 6.6 15C6.4 15.2 6.2 15.3 6 15.4C5.8 15.5 5.6 15.6 5.4 15.6L4.3 15.9C4.1 15.9 3.9 16 3.8 16.1C3.7 16.2 3.6 16.3 3.5 16.5C3.3 17 3.2 17.5 3.2 18C3.2 18.5 3.3 19 3.5 19.5C3.6 19.7 3.7 19.8 3.8 19.9C3.9 20 4.1 20.1 4.3 20.1L5.4 19.7C5.6 19.6 5.8 19.6 6 19.6C6.2 19.6 6.4 19.7 6.6 19.8C6.8 19.9 7 20 7.2 20.2C7.4 20.4 7.5 20.6 7.6 20.8C7.7 21 7.8 21.2 7.8 21.4V22.4C7.8 22.6 7.8 22.8 7.9 23C8 23.2 8.1 23.4 8.3 23.6C8.8 24 9.2 24.3 9.8 24.5C10.4 24.7 11 24.8 11.7 24.8C12.4 24.8 13 24.7 13.6 24.5C14.2 24.3 14.7 24 15.2 23.6C15.4 23.4 15.5 23.2 15.6 23C15.7 22.8 15.8 22.6 15.8 22.4V21.4C15.8 21.2 15.8 21 15.9 20.8C16 20.6 16.1 20.4 16.3 20.2C16.5 20 16.7 19.9 16.9 19.8C17.1 19.7 17.3 19.6 17.5 19.6L18.6 20C18.8 20.1 19 20.1 19.2 20C19.4 19.9 19.6 19.8 19.7 19.6C19.8 19.5 19.9 19.4 20 19.2C20.1 19 20.1 18.8 20.1 18.6C20.4 18.1 20.5 17.6 20.5 17.1C20.5 16.6 20.4 16.1 20.1 15.6C20 15.4 19.9 15.3 19.8 15.2C19.7 15.1 19.5 15 19.4 15.05Z" stroke="currentColor" stroke-width="1.5"/>
-                            </svg>
-                            Настройки
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a href="{{ url_for('main_bp.logout') }}" class="dropdown-item logout-item">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2"/>
-                                <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2"/>
-                                <path d="M21 12H9" stroke="currentColor" stroke-width="2"/>
-                            </svg>
-                            Выйти
-                        </a>
                     </div>
+                    <a href="{{ url_for('main_bp.profile') }}" class="dropdown-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 21V19C20 16.8 18.2 15 16 15H8C5.8 15 4 16.8 4 19V21" stroke="currentColor"
+                                  stroke-width="2" stroke-linecap="round"/>
+                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Мой профиль
+                    </a>
+                    <a href="{{ url_for('main_bp.logout') }}" class="dropdown-item logout-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+                                  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                  stroke-linejoin="round"/>
+                            <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Выйти
+                    </a>
                 </div>
-                {% else %}
-                <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
-                <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
-                {% endif %}
             </div>
+            {% else %}
+            <a href="{{ url_for('main_bp.login') }}" class="register-btn">Войти</a>
+            <a href="{{ url_for('main_bp.register') }}" class="register-btn">Зарегистрироваться</a>
+            {% endif %}
         </div>
-    </header>
+    </div>
+</header>
 
     <main class="pvp-container">
         <!-- ELO карточка -->
         <div class="elo-card">
             <div class="elo-info">
                 <div class="elo-label">Твой рейтинг ELO</div>
-                <div class="elo-value">{{ user_elo if user_elo else '1000' }}</div>
+                <div class="elo-value">{{ elo if elo else '1000' }}</div>
                 <div class="elo-rank">
-                    {% set elo = user_elo|default(1000)|int %}
+                    {% set elo = elo|default(1000)|int %}
                     {% if elo < 800 %}
                         🥉 Новичок
                     {% elif elo < 1200 %}
@@ -467,11 +102,11 @@
             </div>
             <div class="elo-stats">
                 <div class="stat-item">
-                    <div class="stat-value">{{ wins|default(0) }}</div>
+                    <div class="stat-value">{{ winner |default(0) }}</div>
                     <div class="stat-label">Побед</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value">{{ losses|default(0) }}</div>
+                    <div class="stat-value">{{ loser |default(0) }}</div>
                     <div class="stat-label">Поражений</div>
                 </div>
                 <div class="stat-item">
@@ -482,7 +117,7 @@
         </div>
 
         <!-- Плашка с правилами (показывается если нет ELO или если show_rules) -->
-        {% if not user_elo or show_rules %}
+        {% if show_rules %}
         <div class="rules-overlay" id="rulesOverlay">
             <div class="rules-card">
                 <div class="rules-header">
@@ -498,7 +133,9 @@
                                 <li>Выбери предмет (Физика или Математика)</li>
                                 <li>Система подберет соперника твоего уровня</li>
                                 <li>Победитель получает +30 ELO, проигравший -30 ELO</li>
-                                <li>Ничья: +0 ELO для обоих</li>
+                                <li>Ничьи нет, дал неправильный ответ - проиграл</li>
+                                <li>Не успел в нужное время - проиграл</li>
+                                <li>Ввел дробь через точку - проиграл</li>
                             </ul>
                         </div>
                     </div>
@@ -506,11 +143,10 @@
                         <div class="rule-title">⚡ Как проходит матч?</div>
                         <div class="rule-text">
                             <ul class="rule-list">
-                                <li>Каждый участник получает 3 случайные задачи</li>
-                                <li>На решение каждой задачи дается 5 минут</li>
-                                <li>За правильный ответ начисляются очки</li>
+                                <li>Каждый участник получает случайную задачу</li>
+                                <li>У каждого участника задачи одинаковые</li>
+                                <li>На решение задачи дается 5 минут</li>
                                 <li>Сложность задач зависит от твоего ELO</li>
-                                <li>Побеждает тот, кто набрал больше очков</li>
                             </ul>
                         </div>
                     </div>
@@ -521,8 +157,6 @@
                                 <li>Начальный рейтинг ELO: 1000</li>
                                 <li>Победа над сильным соперником дает больше ELO</li>
                                 <li>Поражение от слабого соперника отнимает больше ELO</li>
-                                <li>Чем выше рейтинг, тем сложнее соперники</li>
-                                <li>Топ-100 игроков попадают в таблицу лидеров</li>
                             </ul>
                         </div>
                     </div>
@@ -557,12 +191,816 @@
     </main>
 
     <script>
-        // Правила - пагинация
-        let currentPage = 0;
-        const pages = document.querySelectorAll('.rule-page');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const pageIndicator = document.getElementById('pageIndicator');
+        async function add_user_in_queue(subject) {
+            console.log("{{ session.nickname }}");
+            console.log("{{ session.elo }}");
+            const UserData = {
+                username: '{{ session.nickname }}',
+                elo: '{{ session.elo }}',
+                subject: subject
+            };
+
+
+            const response = await fetch('http://localhost:8001/api/pvp/add_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(UserData)
+            });
+
+            const data = await response.json();
+            return data;
+        }
+
+        async function check_user_in_game() {
+            console.log("Запрос на наличие игры");
+            const UserData = {
+                username: '{{ session.nickname }}',
+                elo: '{{ session.elo }}'
+            };
+
+            const response = await fetch('http://localhost:8001/api/pvp/check_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(UserData)
+            });
+            const data = await response.json();
+            return data;
+        }
+
+        async function startMatch(subject) {
+            showLoading(subject);
+            let isSearching = true;
+            let searchInterval = null;
+
+            const response = await add_user_in_queue(subject);
+            console.log(response.status);
+
+            async function search() {
+                try {
+                    if (!isSearching) return; // Добавить проверку
+
+                    const response = await check_user_in_game();
+
+                    if (response.status === "found") {
+                        isSearching = false;
+                        if (searchInterval) clearTimeout(searchInterval);
+                        updateLoadingToFound(response.opponent, response.match);
+
+                        setTimeout(() => {
+                            hideLoading();
+                            startGame(response);
+                        }, 2000);
+
+                        return;
+
+                    } else if (response.status === "waiting") {
+                        console.log("⏳ Ждем соперника...");
+                        updateLoadingText();
+                    } else {
+                        console.log("❌ Ошибка:", response);
+                    }
+
+                } catch (error) {
+                    console.error("Ошибка запроса:", error);
+                    if (isSearching) updateLoadingError();
+                }
+
+                if (isSearching) {
+                    searchInterval = setTimeout(search, 2000);
+                    window.searchTimeout = searchInterval; // Сохраняем глобально для отмены
+                }
+            }
+
+            // Запускаем поиск
+            search();
+        }
+
+        function startGame(response) {
+        console.log("Запуск startGame", response);
+
+        // Очищаем body и устанавливаем новый стиль
+        document.body.innerHTML = '';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
+        document.body.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+        document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
+        document.body.style.minHeight = '100vh';
+        document.body.style.position = 'relative';
+
+        // Добавляем анимированный фон (частицы)
+        function createParticles() {
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = (Math.random() * 6 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = 'rgba(59, 130, 246, 0.3)';
+                particle.style.borderRadius = '50%';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.pointerEvents = 'none';
+                particle.style.animation = `floatParticle ${Math.random() * 15 + 10}s linear infinite`;
+                particle.style.opacity = Math.random() * 0.5;
+                document.body.appendChild(particle);
+            }
+        }
+
+        // Добавляем CSS анимации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes floatParticle {
+                0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+                10% { opacity: 0.5; }
+                90% { opacity: 0.5; }
+                100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+            }
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+
+            /* Стили для модального окна */
+            .custom-modal {
+                position: fixed;
+                z-index: 10000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(12px);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                animation: fadeIn 0.3s ease-out;
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes slideUp {
+                from { transform: translateY(50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+
+            .modal-content-custom {
+                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                border-radius: 32px;
+                max-width: 500px;
+                width: 90%;
+                padding: 40px;
+                text-align: center;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                animation: slideUp 0.4s ease-out;
+                position: relative;
+            }
+
+            .modal-icon {
+                font-size: 80px;
+                margin-bottom: 20px;
+            }
+
+            .modal-title {
+                font-size: 28px;
+                font-weight: 800;
+                margin-bottom: 16px;
+            }
+
+            .correct-title {
+                background: linear-gradient(135deg, #22c55e, #16a34a);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .wrong-title {
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .modal-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+                line-height: 1.6;
+            }
+
+            .modal-user-answer {
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 16px;
+                padding: 16px;
+                margin: 20px 0;
+                text-align: left;
+                font-family: monospace;
+                font-size: 14px;
+                color: #94a3b8;
+                border-left: 3px solid #3b82f6;
+            }
+
+            .modal-user-answer strong {
+                color: #60a5fa;
+                display: block;
+                margin-bottom: 8px;
+            }
+
+            .modal-exit-btn {
+                background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                border: none;
+                padding: 14px 32px;
+                border-radius: 40px;
+                color: white;
+                font-size: 16px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.3s;
+                margin-top: 10px;
+            }
+
+            .modal-exit-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+            }
+
+            .modal-exit-btn:active {
+                transform: translateY(0);
+            }
+
+            .modal-close {
+                position: absolute;
+                top: 20px;
+                right: 25px;
+                font-size: 28px;
+                cursor: pointer;
+                color: #94a3b8;
+                transition: color 0.2s;
+            }
+
+            .modal-close:hover {
+                color: white;
+            }
+        `;
+        document.head.appendChild(style);
+
+        createParticles();
+
+        // Получаем данные из response
+        const opponent = response.opponent || 'Неизвестен';
+        const opponentAvatar = opponent.charAt(0).toUpperCase();
+        const taskText = response.match || 'Загрузка задачи...';
+        const taskImage = response.task_image || null;
+        const currentQuestion = response.current_question || 1;
+        const totalQuestions = response.total_questions || 3;
+        const yourScore = response.your_score || 0;
+        const opponentScore = response.opponent_score || 0;
+        const timeLeft = 300 - response.time;
+        const yourElo = response.your_elo || 1000;
+        const opponentElo = response.opponent_elo || 1000;
+
+        // Формируем HTML
+        const html = `
+            <div style="position: relative; z-index: 10; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 40px 20px;">
+                <div style="max-width: 900px; width: 100%; background: rgba(26, 31, 46, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 32px; animation: fadeInUp 0.6s ease-out; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+
+                    <!-- Шапка матча -->
+                    <div style="padding: 30px 30px 20px; text-align: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                        <div style="display: inline-block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; margin-bottom: 15px;">⚔️ LIVE MATCH ⚔️</div>
+                        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <!-- Ты -->
+                            <div style="flex: 1; min-width: 150px; text-align: center; padding: 15px; background: rgba(59, 130, 246, 0.1); border-radius: 20px; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <div style="width: 70px; height: 70px; margin: 0 auto 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);">Я</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #60a5fa; margin-bottom: 5px;">Вы</div>
+                                <div style="font-size: 0.75rem; color: #94a3b8;">ELO: ${yourElo}</div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 10px;">VS</div>
+                            <!-- Соперник -->
+                            <div style="flex: 1; min-width: 150px; text-align: center; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 20px; border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <div style="width: 70px; height: 70px; margin: 0 auto 12px; background: linear-gradient(135deg, #8b5cf6, #c084fc); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">${opponentAvatar}</div>
+                                <div style="font-size: 1.1rem; font-weight: 600; color: #c084fc; margin-bottom: 5px;">${escapeHtml(opponent)}</div>
+                                <div style="font-size: 0.75rem; color: #94a3b8;">ELO: ${opponentElo}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Основной контент -->
+                    <div style="padding: 30px;">
+                        <!-- Информация о матче -->
+                        <div style="background: rgba(59, 130, 246, 0.08); border-radius: 20px; padding: 20px; margin-bottom: 30px; border: 1px solid rgba(59, 130, 246, 0.15);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+
+                                <div id="timer" style="display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 1.2rem; font-weight: 700; padding: 8px 16px; background: rgba(0, 0, 0, 0.3); border-radius: 40px;">
+                                    ⏱️ <span id="timerSeconds">${formatTime(timeLeft)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Задача -->
+                        <div style="margin-bottom: 30px;">
+                            <div style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: #94a3b8; margin-bottom: 15px;">📖 ЗАДАЧА</div>
+                            <div style="background: rgba(0, 0, 0, 0.3); border-radius: 20px; padding: 25px; border: 1px solid rgba(255, 255, 255, 0.08);">
+                                <div id="taskText" style="font-size: 1.1rem; line-height: 1.7; color: #e2e8f0; margin-bottom: 20px;">${taskText}</div>
+                                ${taskImage ? `
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <img id="taskImage" src="${taskImage}" alt="Иллюстрация" style="max-width: 100%; max-height: 300px; border-radius: 16px; cursor: pointer; transition: transform 0.3s;" onclick="openImageModal()">
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Форма ответа -->
+                        <div style="margin-bottom: 30px;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 500; color: #cbd5e1; margin-bottom: 12px;">✏️ ТВОЙ ОТВЕТ</label>
+                            <textarea id="myInput" rows="3" style="width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; color: #ffffff; font-size: 1rem; font-family: monospace; resize: vertical; box-sizing: border-box;" placeholder="Введи ответ или решение здесь..."></textarea>
+                        </div>
+
+                        <button id="checkButton" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border: none; border-radius: 16px; color: white; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; position: relative; overflow: hidden;" onclick="window.passAnswer()">✅ ПРОВЕРИТЬ ОТВЕТ</button>
+
+                        <div id="result" style="background: rgba(0, 0, 0, 0.2); border-radius: 16px; padding: 15px 20px; display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.innerHTML = html;
+
+        // Добавляем глобальные функции
+        window.checkCancelSearch = checkCancelSearch;
+        window.cancelSearch = function() {
+            // Остановка поиска
+            if (window.searchTimeout) {
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = null;
+            }
+            // Дополнительная логика
+        };
+
+        window.passAnswer = async function() {
+            console.log("from window");
+            const answer = document.getElementById('myInput').value;
+            const checkBtn = document.getElementById('checkButton');
+
+            if (!answer.trim()) {
+                showGameResultModal(false, 'Пожалуйста, введи ответ!', answer, true);
+                return;
+            }
+
+            checkBtn.style.opacity = '0.5';
+            checkBtn.textContent = '⏳ ПРОВЕРКА...';
+            console.log(answer);
+            const response = await checkAnswer(answer);
+            console.log("passAnswer", response)
+
+            // Используем модальное окно вместо showResult
+            if (response["status"] == "win") {
+                showGameResultModal(true, response["info"], answer, false);
+            } else if (response["status"] == "fail") {
+                showGameResultModal(false, response["info"], answer, false);
+            } else if (response["status"] == "wrong answer") {
+                showGameResultModal(false, response["info"], answer, false);
+            }
+
+            checkBtn.textContent = '🏠 Выход на главную PvP';
+            checkBtn.disabled = true;
+            checkBtn.style.cursor = 'pointer';
+
+            // При клике на кнопку - переход на главную PvP
+            checkBtn.onclick = function() {
+                window.location.href = "{{ url_for('main_bp.pvp_mode') }}";
+            };
+        };
+
+        window.showGameResultModal = function(isCorrect, message, userAnswer, isInputError = false) {
+            // Удаляем старый модал если есть
+            const oldModal = document.getElementById('gameResultModal');
+            if (oldModal) oldModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'gameResultModal';
+            modal.className = 'custom-modal';
+
+            const icon = isCorrect ? '🏆' : (isInputError ? '⚠️' : '❌');
+            const title = isCorrect ? 'Поздравляем!' : (isInputError ? 'Внимание!' : 'Увы...');
+            const titleClass = isCorrect ? 'correct-title' : 'wrong-title';
+
+            modal.innerHTML = `
+                <div class="modal-content-custom">
+                    <span class="modal-close" onclick="document.getElementById('gameResultModal').remove()">&times;</span>
+                    <div class="modal-icon">${icon}</div>
+                    <div class="modal-title ${titleClass}">${title}</div>
+                    <div class="modal-message">${message || (isCorrect ? 'Правильный ответ!' : 'Неправильный ответ')}</div>
+                    ${userAnswer && !isInputError ? `
+                    <div class="modal-user-answer">
+                        <strong>📝 Твой ответ:</strong>
+                        ${escapeHtml(userAnswer.substring(0, 200))}${userAnswer.length > 200 ? '...' : ''}
+                    </div>
+                    ` : ''}
+                    <button class="modal-exit-btn" onclick="window.location.href = '{{ url_for('main_bp.pvp_mode') }}'">
+                        🚪 Выйти на главную PvP
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // Закрытие по клику вне окна
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        };
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        window.updateMatchData = function(data) {
+            if (data.your_score !== undefined) {
+                const yourScoreEl = document.getElementById('yourScore');
+                if (yourScoreEl) yourScoreEl.textContent = data.your_score;
+            }
+            if (data.opponent_score !== undefined) {
+                const opponentScoreEl = document.getElementById('opponentScore');
+                if (opponentScoreEl) opponentScoreEl.textContent = data.opponent_score;
+            }
+            if (data.current_question !== undefined) {
+                const currentQEl = document.querySelector('#currentQuestion');
+                if (currentQEl) currentQEl.textContent = data.current_question;
+            }
+            if (data.time_left !== undefined) {
+                const timerSeconds = document.getElementById('timerSeconds');
+                if (timerSeconds) timerSeconds.textContent = formatTime(data.time_left);
+
+                const timerDiv = document.getElementById('timer');
+                if (timerDiv) {
+                    if (data.time_left <= 60) {
+                        timerDiv.style.color = '#f87171';
+                        timerDiv.style.animation = 'pulse 0.5s infinite';
+                    } else if (data.time_left <= 120) {
+                        timerDiv.style.color = '#facc15';
+                        timerDiv.style.animation = 'none';
+                    } else {
+                        timerDiv.style.color = '#ffffff';
+                        timerDiv.style.animation = 'none';
+                    }
+                }
+            }
+            if (data.task !== undefined) {
+                const taskTextEl = document.getElementById('taskText');
+                if (taskTextEl) taskTextEl.innerHTML = escapeHtml(data.task);
+            }
+            if (data.task_image !== undefined && data.task_image) {
+                let taskImg = document.getElementById('taskImage');
+                if (!taskImg) {
+                    const taskCard = document.querySelector('.task-card');
+                    if (taskCard) {
+                        const imgDiv = document.createElement('div');
+                        imgDiv.style.marginTop = '20px';
+                        imgDiv.style.textAlign = 'center';
+                        imgDiv.innerHTML = `<img id="taskImage" src="${data.task_image}" alt="Иллюстрация" style="max-width: 100%; max-height: 300px; border-radius: 16px; cursor: pointer;" onclick="openImageModal()">`;
+                        taskCard.appendChild(imgDiv);
+                    }
+                } else {
+                    taskImg.src = data.task_image;
+                }
+            }
+
+            // Активируем кнопку после обновления
+            const checkBtn = document.getElementById('checkButton');
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.style.opacity = '1';
+                checkBtn.textContent = '✅ ПРОВЕРИТЬ ОТВЕТ';
+            }
+
+            // Очищаем поле ввода
+            const inputField = document.getElementById('myInput');
+            if (inputField) inputField.value = '';
+        };
+
+        window.openImageModal = function() {
+            const taskImg = document.getElementById('taskImage');
+            if (taskImg && taskImg.src) {
+                const modal = document.createElement('div');
+                modal.id = 'imageModal';
+                modal.style.cssText = 'position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(10px); cursor: pointer; display: flex; justify-content: center; align-items: center;';
+                modal.onclick = function() { modal.remove(); };
+                modal.innerHTML = `
+                    <div style="position: absolute; top: 20px; right: 40px; font-size: 40px; color: white; cursor: pointer;">&times;</div>
+                    <img src="${taskImg.src}" style="max-width: 90%; max-height: 90%; border-radius: 16px;">
+                `;
+                document.body.appendChild(modal);
+            }
+        };
+
+        async function checkAnswer(answer) {
+            console.log("Ответ:", answer);
+            const TaskKeys = {
+                user_id: '{{ session.nickname }}',
+                his_answer: answer,
+            };
+
+            const response = await fetch('http://localhost:8001/api/pvp/check_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(TaskKeys)
+            });
+
+            const data = await response.json();
+            console.log("checkAnswer", data)
+            return data;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // Запускаем таймер если передан time_left
+        if (timeLeft && timeLeft > 0) {
+            let remaining = timeLeft;
+            let answerSent = false; // Флаг, чтобы не отправить ответ дважды
+
+            const timerInterval = setInterval(async () => {
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+
+                    // Отправляем пустой ответ, если ещё не отправляли
+                    if (!answerSent && window.passAnswer) {
+                        answerSent = true;
+                        console.log("⏰ Время вышло! Отправляем пустой ответ...");
+
+                        // Блокируем кнопку и показываем сообщение
+                        const checkBtn = document.getElementById('checkButton');
+                        const resultDiv = document.getElementById('result');
+
+                        if (checkBtn) {
+                            checkBtn.disabled = true;
+                            checkBtn.style.opacity = '0.5';
+                            checkBtn.textContent = '⏰ ВРЕМЯ ВЫШЛО';
+                        }
+
+                        // Отправляем пустой ответ
+                        const response = await checkAnswer("");
+                        console.log("Ответ по таймауту:", response);
+
+                        // Показываем результат
+                        if (response && resultDiv) {
+                            resultDiv.style.display = 'block';
+
+                            if (response.status === "win") {
+                                showGameResultModal(true, response["info"], "", false);
+                            } else if (response.status === "fail") {
+                                showGameResultModal(false, response["info"], "", false);
+                            } else if (response.status === "wrong answer") {
+                                showGameResultModal(false, response["info"], "", false);
+                            }
+
+                            // Скрываем результат через 4 секунды
+                            setTimeout(() => {
+                                if (resultDiv) resultDiv.style.display = 'none';
+                            }, 4000);
+                        }
+                    }
+                    return;
+                }
+
+                remaining--;
+                const timerSeconds = document.getElementById('timerSeconds');
+                const timerDiv = document.getElementById('timer');
+
+                if (timerSeconds) timerSeconds.textContent = formatTime(remaining);
+                if (timerDiv) {
+                    if (remaining <= 10) {
+                        // Очень срочно - красный и мигающий
+                        timerDiv.style.background = 'rgba(239, 68, 68, 0.3)';
+                        timerDiv.style.color = '#ff4444';
+                        timerDiv.style.animation = 'pulse 0.3s infinite';
+                        timerDiv.style.fontWeight = 'bold';
+
+                        // Вибрация страницы при последних 5 секундах (опционально)
+                        if (remaining <= 5) {
+                            document.body.style.animation = 'shake 0.2s ease-in-out 0s 2';
+                            setTimeout(() => {
+                                document.body.style.animation = '';
+                            }, 400);
+                        }
+                    } else if (remaining <= 30) {
+                        // Срочно - оранжевый
+                        timerDiv.style.background = 'rgba(250, 204, 21, 0.2)';
+                        timerDiv.style.color = '#facc15';
+                        timerDiv.style.animation = 'none';
+                    } else if (remaining <= 60) {
+                        // Предупреждение - жёлтый
+                        timerDiv.style.background = 'rgba(250, 204, 21, 0.1)';
+                        timerDiv.style.color = '#facc15';
+                        timerDiv.style.animation = 'none';
+                    } else {
+                        // Нормально
+                        timerDiv.style.background = 'rgba(0, 0, 0, 0.3)';
+                        timerDiv.style.color = '#ffffff';
+                        timerDiv.style.animation = 'none';
+                    }
+                }
+            }, 1000);
+        }
+    }
+
+        function showLoading(subject) {
+            // Удаляем старый оверлей если есть
+            const oldOverlay = document.getElementById('pvpLoadingOverlay');
+            if (oldOverlay) oldOverlay.remove();
+
+            // Создаем оверлей
+            const overlay = document.createElement('div');
+            overlay.id = 'pvpLoadingOverlay';
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <div class="loading-text" id="loadingText">
+                        🔍 Ищем соперника...
+                    </div>
+                    <div id="loadingDetail" style="font-size: 14px; color: #666; margin-top: 10px;">
+                        ⏳ Поиск может занять до 30 секунд
+                    </div>
+                    <button id="cancelSearchBtn" style="margin-top: 20px; padding: 8px 20px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer;" onclick="checkCancelSearch('${subject}')">
+                        ❌ Отменить поиск
+                    </button>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+        }
+
+        async function canCancelSearch(subject) {
+            const TaskKeys = {
+                username: '{{ session.nickname }}',
+                elo: '{{ session.elo }}',
+                subject: subject,
+            };
+
+            const response = await fetch('http://localhost:8001/api/pvp/cancel_selection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(TaskKeys)
+            });
+
+            const data = await response.json();
+            console.log("cancelSelection response", data);
+            return data;
+        }
+
+        async function checkCancelSearch(subject) {
+            const response = await canCancelSearch(subject);
+            console.log(response);
+            if (response["status"] == "success") {
+                console.log("Поиск отменен пользователем");
+                cancelSearch();
+                hideLoading();
+                console.log("Поиск отменен пользователем");
+            }
+        }
+
+        function cancelSearch() {
+            // Дополнительная логика для остановки поиска
+            // Останавливаем интервалы, если они есть
+            if (window.searchTimeout) {
+                clearTimeout(window.searchTimeout);
+                window.searchTimeout = null;
+            }
+        }
+
+        function updateLoadingText() {
+            const textElement = document.getElementById('loadingText');
+            if (textElement) {
+                const messages = [
+                    "🔍 Ищем соперника...",
+                    "🔄 Проверяем очередь...",
+                    "⚡ Подбираем противника...",
+                    "🎯 Почти нашли...",
+                    "⏳ Ожидаем соперника..."
+                ];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                textElement.innerHTML = randomMessage;
+            }
+        }
+
+        function updateLoadingToFound(opponent, task) {
+            const overlay = document.getElementById('pvpLoadingOverlay');
+            if (!overlay) return;
+
+            const card = overlay.querySelector('.loading-card');
+            const spinner = overlay.querySelector('.spinner');
+            const textElement = document.getElementById('loadingText');
+            const detailElement = document.getElementById('loadingDetail');
+            const cancelBtn = document.getElementById('cancelSearchBtn');
+
+            // Убираем спиннер, показываем галочку
+            if (spinner) spinner.style.display = 'none';
+
+            // Добавляем галочку
+            const checkmark = document.createElement('div');
+            checkmark.innerHTML = '✅';
+            checkmark.style.fontSize = '48px';
+            checkmark.style.margin = '20px auto';
+            card.insertBefore(checkmark, textElement);
+
+            // Обновляем текст
+            if (textElement) {
+                textElement.innerHTML = `🎉 Противник найден!<br><span style="font-size: 16px;">Противник: ${opponent}</span>`;
+                textElement.classList.add('found-message');
+            }
+
+            if (detailElement) {
+                detailElement.innerHTML = '🏆 Перенаправляем в игру...';
+            }
+
+            if (cancelBtn) cancelBtn.style.display = 'none';
+
+            // Добавляем анимацию
+            card.style.border = '2px solid #28a745';
+        }
+
+        function updateLoadingError() {
+            const textElement = document.getElementById('loadingText');
+            if (textElement) {
+                textElement.innerHTML = '⚠️ Ошибка соединения<br><span style="font-size: 14px;">Повторяем попытку...</span>';
+            }
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('pvpLoadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+
+        function closeRules() {
+            const overlay = document.getElementById('rulesOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            // Сохраняем в localStorage что пользователь закрыл правила
+            localStorage.setItem('pvp_rules_closed', 'true');
+            }
+
+        function nextPage() {
+            if (currentPage < pages.length - 1) {
+                currentPage++;
+                updateRules();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                updateRules();
+            }
+        }
 
         function updateRules() {
             pages.forEach((page, index) => {
@@ -585,35 +1023,65 @@
             }
         }
 
-        function nextPage() {
-            if (currentPage < pages.length - 1) {
-                currentPage++;
-                updateRules();
+        async function checkIfRefreshed() {
+            console.log('Страница была обновлена (F5 или Ctrl+R)..');
+            response = await check_user_in_game();
+            console.log(response);
+            if (response["status"] == "found") {
+                await startGame(response);
+            } else if (response["status"] == "waiting") {
+                showLoading(response["subject"]);
+                let isSearching = true;
+                let searchInterval = null;
+                console.log(response.status);
+
+                async function search() {
+                    try {
+                        if (!isSearching) return; // Добавить проверку
+
+                        const response = await check_user_in_game();
+
+                        if (response.status === "found") {
+                            isSearching = false;
+                            if (searchInterval) clearTimeout(searchInterval);
+                            updateLoadingToFound(response.opponent, response.match);
+
+                            setTimeout(() => {
+                                hideLoading();
+                                startGame(response);
+                            }, 2000);
+
+                            return;
+
+                        } else if (response.status === "waiting") {
+                            console.log("⏳ Ждем соперника...");
+                            updateLoadingText();
+                        } else {
+                            console.log("❌ Ошибка:", response);
+                        }
+
+                    } catch (error) {
+                        console.error("Ошибка запроса:", error);
+                        if (isSearching) updateLoadingError();
+                    }
+
+                    if (isSearching) {
+                        searchInterval = setTimeout(search, 2000);
+                        window.searchTimeout = searchInterval; // Сохраняем глобально для отмены
+                    }
+                }
+
+                // Запускаем поиск
+                search();
             }
         }
 
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                updateRules();
-            }
-        }
-
-        function closeRules() {
-            const overlay = document.getElementById('rulesOverlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            // Сохраняем в localStorage что пользователь закрыл правила
-            localStorage.setItem('pvp_rules_closed', 'true');
-        }
-
-        function startMatch(subject) {
-            // Здесь будет логика начала матча
-            console.log(`Поиск соперника по предмету: ${subject}`);
-            // Можно сделать редирект или показать модалку ожидания
-            alert(`🔍 Поиск соперника по ${subject === 'physics' ? 'Физике' : 'Математике'}...\nСкоро начнется матч!`);
-        }
+        // Правила - пагинация
+        let currentPage = 0;
+        const pages = document.querySelectorAll('.rule-page');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const pageIndicator = document.getElementById('pageIndicator');
 
         // Клик вне плашки для закрытия
         document.addEventListener('click', function(event) {
@@ -633,8 +1101,10 @@
             }
         });
 
-        // Инициализация
-        updateRules();
+        checkIfRefreshed();
+
+        // Для отладки - проверяем что скрипт загрузился
+        console.log("Скрипт загружен, функция startMatch доступна");
     </script>
     <script src="../../static/script.js"></script>
 </body>

@@ -201,4 +201,24 @@ def pvp_mode():
     if session.get('user_id') is None:
         return redirect('/login.html')
     else:
-        return render_template('pvp_mode.html')
+        user = User.query.filter_by(nickname=session["nickname"]).first()
+        if user.elo == -1:
+            User.add_rating(session["nickname"], 1001)
+            user = User.query.filter_by(nickname=session["nickname"]).first()
+            session["elo"] = user.elo
+            print(session["elo"])
+            win = user.winner
+            lose = user.loser
+            winrate = win * 100 / (win + lose) if win + lose != 0 else 0
+            return render_template('pvp_mode.html', show_rules=True, elo=session["elo"], winner=win,
+                                   loser=lose, winrate=winrate)
+
+        else:
+            user = User.query.filter_by(nickname=session["nickname"]).first()
+            session["elo"] = user.elo
+            print(session["elo"])
+            win = user.winner
+            lose = user.loser
+            winrate = win * 100 / (win + lose) if win + lose != 0 else 0
+            return render_template('pvp_mode.html', show_rules=False, elo=session["elo"], winner=win,
+                                   loser=lose, winrate=winrate)
