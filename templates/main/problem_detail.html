@@ -6,6 +6,52 @@
     <title>{{ problem.title if problem.title else 'Задача' }} | AvailOlimp</title>
     <link rel="stylesheet" href="../../static/style.css">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('main_bp.static', filename='images/favicon.png') }}">
+    <style>
+        .correct-answer {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 0;
+        }
+
+        .correct-answer-label {
+            color: #4ade80;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .correct-answer-text {
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-family: 'Inter', monospace;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .solved-notification {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .solved-icon {
+            font-size: 24px;
+        }
+
+        .solved-text {
+            color: #4ade80;
+            font-weight: 500;
+        }
+    </style>
 </head>
 <body>
 <div class="decor-element decor-1"></div>
@@ -121,40 +167,42 @@
             </div>
             {% endif %}
 
+
+            <div id="notificationContainer"></div>
+
             {% if problem.id|string in session.completed_task %}
-            <div class="notification notification-success">
-                <span class="notification-icon">✓</span>
-                <span class="notification-message">Задача решена!</span>
+            <div class="solved-notification">
+                <div class="solved-text">Задача решена!</div>
             </div>
-            {% elif session.get('incorrect_answer_' ~ problem.id) %}
-            <div class="notification notification-error">
-                <span class="notification-icon">✗</span>
-                <span class="notification-message">Ответ неверный! Попробуйте еще раз.</span>
+
+            {% if problem.correct_answer %}
+            <div class="correct-answer">
+                <div class="correct-answer-label">✓ Правильный ответ</div>
+                <div class="correct-answer-text">{{ problem.correct_answer }}</div>
             </div>
             {% endif %}
 
-            <form method="POST" class="answer-form">
-                {% if problem.id|string not in session.completed_task %}
+            <div class="button-group">
+                <a href="{{ url_for('main_bp.subject_mode', subject='physics') if problem.object == 'physics' else url_for('main_bp.subject_mode', subject='math') }}"
+                   class="back-btn">← Назад к задачам</a>
+            </div>
+            {% else %}
+            <form id="answerForm" class="answer-form">
                 <label class="answer-label">Твой ответ:</label>
-                <textarea name="answer" class="answer-input" rows="4"
+                <textarea name="answer" id="answerInput" class="answer-input" rows="4"
                           placeholder="Введи решение или ответ здесь..."></textarea>
+
                 <div class="button-group">
-                    <button type="submit" class="submit-btn">Проверить ответ</button>
+                    <button type="submit" id="submitBtn" class="submit-btn">Проверить ответ</button>
                     <a href="{{ url_for('main_bp.subject_mode', subject='physics') if problem.object == 'physics' else url_for('main_bp.subject_mode', subject='math') }}"
                        class="back-btn">← Назад к задачам</a>
                 </div>
-                {% else %}
-                <div class="button-group">
-                    <a href="{{ url_for('main_bp.subject_mode', subject='physics') if problem.object == 'physics' else url_for('main_bp.subject_mode', subject='math') }}"
-                       class="back-btn">← Назад к задачам</a>
-                </div>
-                {% endif %}
             </form>
+            {% endif %}
         </div>
     </div>
 </main>
 
-<!-- Модальное окно для увеличенного фото -->
 <div id="imageModal" class="modal" onclick="closeModal()">
     <span class="close-modal">&times;</span>
     <div class="modal-content">
@@ -182,6 +230,79 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeModal();
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('answerForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const answerInput = document.getElementById('answerInput');
+        const notificationContainer = document.getElementById('notificationContainer');
+        const problemId = {{ problem.id }};
+
+        function showNotification(message, isSuccess) {
+            notificationContainer.innerHTML = `
+                <div class="notification ${isSuccess ? 'notification-success' : 'notification-error'}">
+                    <span class="notification-icon">${isSuccess ? '✓' : '✗'}</span>
+                    <span class="notification-message">${message}</span>
+                </div>
+            `;
+
+            notificationContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            setTimeout(() => {
+                notificationContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        if (form && submitBtn && answerInput) {
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const answer = answerInput.value.trim();
+
+                if (!answer) {
+                    showNotification('Пожалуйста, введите ответ', false);
+                    answerInput.focus();
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Проверка...';
+
+                try {
+                    const response = await fetch(`/problem/${problemId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            answer: answer
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        showNotification('Задача решена! Отлично!', true);
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showNotification(data.message || 'Ответ неверный! Попробуйте еще раз.', false);
+                        answerInput.value = '';
+                        answerInput.focus();
+                    }
+                } catch (error) {
+                    console.error('Ошибка:', error);
+                    showNotification('Произошла ошибка сервера. Попробуйте позже.', false);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
         }
     });
 </script>

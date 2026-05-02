@@ -7,6 +7,8 @@ main_bp = Blueprint('main_bp', __name__,
                     static_folder='../static')
 
 
+#TODO Убрать все что для совместимости
+
 # главный блок (index, register, login, logout)
 @main_bp.route('/')
 def index():
@@ -148,21 +150,38 @@ def problem_detail(problem_id):
                                task_image=problem.attachment)
 
     elif request.method == 'POST':
-        answer = request.form['answer']
-        server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, problem_id)
-
-        if server_answer[0] == "success":
-            print(server_answer[1])
-            if 'completed_task' not in session:
-                session['completed_task'] = []
-            session['completed_task'].append(str(problem_id))
-            session.modified = True
-            print(session['completed_task'])
+        if request.is_json:
+            data = request.get_json()
+            answer = data.get('answer')
         else:
-            session[f"incorrect_answer_{problem_id}"] = True
-            session.modified = True
+            # Для совместимости
+            answer = request.form['answer']
 
-    return redirect(f'/problem/{problem_id}')
+        server_answer = SolvedProblem.add_solved_problem(session.get('user_id'), answer, problem_id)
+        if request.is_json:
+            if server_answer[0] == "success":
+                if 'completed_task' not in session:
+                    session['completed_task'] = []
+                if str(problem_id) not in session['completed_task']:
+                    session['completed_task'].append(str(problem_id))
+                session.modified = True
+                return jsonify({'success': True, 'message': 'Задача решена!'})
+            else:
+                return jsonify({'success': False, 'message': 'Ответ неверный!'}), 400
+        else:
+            # Для совместимости
+            if server_answer[0] == "success":
+                if 'completed_task' not in session:
+                    session['completed_task'] = []
+                if str(problem_id) not in session['completed_task']:
+                    session['completed_task'].append(str(problem_id))
+                session.modified = True
+            else:
+                session[f"incorrect_answer_{problem_id}"] = True
+                session.modified = True
+
+            return redirect(f'/problem/{problem_id}')
+
 
 # Профиль
 @main_bp.route('/profile.html')
@@ -170,11 +189,12 @@ def profile():
     if session.get('user_id') is None:
         return redirect('/login.html')
     user = User.query.get(session['user_id'])
-    print(f"user: {user}")
     return render_template('profile.html',
                            title="Мой профиль",
                            user=user,
                            main_bp=main_bp)
+
+
 # раздел pvp
 @main_bp.route('/pvp_mode.html')
 def pvp_mode():

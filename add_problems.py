@@ -107,7 +107,7 @@ def add_problems():
     Problem.add_problem(object='math_pvp', title='Площадь фигуры', condition=
     f"""В прямоугольнике ABCD со сторонами AB = 10, BC = 12 отметили точку M — середину стороны CD. На отрезке BM отметили точку P так, что BC = BP. Найдите площадь четырехугольника ABPD.<br>Ответ дайте с точностью до десятых""",
                         right_answer='87,7', attachment='')
-    Problem.add_problem(object='math', title='Призма', condition=
+    Problem.add_problem(object='math_pvp', title='Призма', condition=
     f"""Дана правильная десятиугольная призма {ssstyle("A1A2...A10B1B2...B10")}. Некоторая плоскость 𝛼 пересекает n её рёбер, не проходя ни через одну из точек {ssstyle("A1A2...A10B1B2...B10")}.<br>Какое наибольшее натуральное значение может принимать n?""",
                         right_answer='12', attachment='')
     Problem.add_problem(object='math_pvp', title='Хорошие пары', condition=

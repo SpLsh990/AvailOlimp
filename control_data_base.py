@@ -17,7 +17,7 @@ class User(db.Model):
     elo = db.Column(db.Integer, default=-1)
     register_day = db.Column(db.DateTime, default=lambda: datetime.now().replace(microsecond=0))
     last_entry = db.Column(db.DateTime, nullable=False,
-                           default=lambda: datetime.now().replace(second=0, microsecond=0))
+                           default=lambda: datetime.now().replace(microsecond=0))
 
     @staticmethod
     def register_user(email, password, nickname):
@@ -51,7 +51,6 @@ class User(db.Model):
             else:
                 return ("error", "Wrong answer")
         else:
-            print("Current user does not exist")
             return ("error", "Current user does not exist")
 
 
