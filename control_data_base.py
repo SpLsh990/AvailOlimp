@@ -148,7 +148,7 @@ class SolvedProblem(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    problem_id = db.Column(db.String, db.ForeignKey("problems.id"))
+    problem_id = db.Column(db.String)
 
     # метод для добавления новой решенной задачи
     @staticmethod
