@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ffllaapp # Your app working directory!!!
+cd ffllaapp https://github.com/SpLsh990/AvailOlimp.git -b Final-stage-(probably)
 export PORT=5000
 unset PIP_USER
 
