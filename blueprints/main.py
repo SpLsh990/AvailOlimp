@@ -13,6 +13,7 @@ GOOGLE_CLIENT_SECRET = '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'
 GOOGLE_REDIRECT_URI = 'https://availolimpbeta.pythonanywhere.com/auth/callback'
 GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo'
 
 # TODO Убрать все что для совместимости
 
