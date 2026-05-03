@@ -13,7 +13,6 @@ GOOGLE_CLIENT_SECRET = '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'
 GOOGLE_REDIRECT_URI = 'http://localhost:5000/auth/callback' # ПОМЕНЯТЬ НА СТАТИЧЕСКИЙ В ФИНАЛЕ
 GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
-GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo'
 
 # TODO Убрать все что для совместимости
 
@@ -167,7 +166,7 @@ def generate_auth_url(auth_url, params):
 
 
 @main_bp.route('/google_redirect')
-def login_oauth():
+def google_redirect():
     # Начало авторизации через Google
     reg = request.args.get('registration')
 
@@ -196,8 +195,8 @@ def callback():
 
     # Обмениваем код на токен
     token_data = {
-        'client_id': '922930227873-tnmm1pickre1o6cnm9qf6aunteq7ifro.apps.googleusercontent.com',
-        'client_secret': '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',
+        'client_id': GOOGLE_CLIENT_ID,
+        'client_secret': GOOGLE_CLIENT_SECRET,
         'grant_type': 'authorization_code',
         'redirect_uri': GOOGLE_REDIRECT_URI,
         'code': code
