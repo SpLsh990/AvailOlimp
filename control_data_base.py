@@ -14,6 +14,7 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     nickname = db.Column(db.String(100), nullable=False, unique=True)
+    google = db.Column(db.Boolean, nullable=False, default=False)
     elo = db.Column(db.Integer, default=-1)
     winner = db.Column(db.Integer, default=0)
     loser = db.Column(db.Integer, default=0)
@@ -22,7 +23,7 @@ class User(db.Model):
                            default=lambda: datetime.now().replace(microsecond=0))
 
     @staticmethod
-    def register_user(email, password, nickname):
+    def register_user(email, password, nickname, google=False):
         try:
             is_valid, result = email_is_valid(email)
             if not is_valid:
@@ -30,7 +31,7 @@ class User(db.Model):
             exist_user = User.query.filter_by(email=result).first() or User.query.filter_by(nickname=nickname).first()
             if not exist_user:
                 h_password = hashpw(password.encode(), gensalt(rounds=12))
-                new_user = User(email=email, password=h_password, nickname=nickname)
+                new_user = User(email=email, password=h_password, nickname=nickname, google=google)
                 db.session.add(new_user)
                 db.session.commit()
                 return ("success", new_user.id)
@@ -40,18 +41,23 @@ class User(db.Model):
             return ("error", str(e))
 
     @staticmethod
-    def login_user(email, password):
+    def login_user(email, password, google=False):
         is_valid, result = email_is_valid(email)
         if not is_valid:
             return ("error", result)
         exist_user = User.query.filter_by(email=result).first()
         if exist_user:
-            if checkpw(password.encode(), exist_user.password):
+            if google == exist_user.google:
                 exist_user.last_entry = datetime.now().replace(microsecond=0)
                 db.session.commit()
                 return ("success", exist_user)
             else:
-                return ("error", "Wrong answer")
+                if checkpw(password.encode(), exist_user.password):
+                    exist_user.last_entry = datetime.now().replace(microsecond=0)
+                    db.session.commit()
+                    return ("success", exist_user)
+                else:
+                    return ("error", "Wrong answer")
         else:
             return ("error", "Current user does not exist")
 
@@ -148,7 +154,7 @@ class SolvedProblem(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    problem_id = db.Column(db.String)
+    problem_id = db.Column(db.String, db.ForeignKey("problems.id"))
 
     # метод для добавления новой решенной задачи
     @staticmethod
