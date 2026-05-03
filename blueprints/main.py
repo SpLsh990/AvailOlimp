@@ -10,7 +10,7 @@ main_bp = Blueprint('main_bp', __name__,
 
 GOOGLE_CLIENT_ID = '922930227873-tnmm1pickre1o6cnm9qf6aunteq7ifro.apps.googleusercontent.com'
 GOOGLE_CLIENT_SECRET = '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'
-GOOGLE_REDIRECT_URI = 'http://localhost:5000/auth/callback' # ПОМЕНЯТЬ НА СТАТИЧЕСКИЙ В ФИНАЛЕ
+GOOGLE_REDIRECT_URI = 'https://availolimpbeta.pythonanywhere.com/auth/callback'
 GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 
@@ -242,7 +242,7 @@ def logout():
 
 
 # Разделы физика или математика
-@main_bp.route('/<subject>_mode.html')
+@main_bp.route('/<subject>_mode')
 def subject_mode(subject):
     if session.get('user_id') is None:
         return redirect('/login')
